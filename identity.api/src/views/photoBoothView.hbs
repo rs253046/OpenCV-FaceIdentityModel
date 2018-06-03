@@ -1,0 +1,38 @@
+<div class="container center">
+  <div class="row">
+    <p>Training Progress - <div id="training-progress"></div></p>
+    <p><button type="button">Train Next Set</button></p>
+  </div>
+  <div class="row">
+    <canvas id="canvas-video" width="640" height="480"></canvas>
+  </div>
+</div>
+<script>
+  var canvas = document.getElementById('canvas-video');
+  var trainingProgressElement = document.getElementById('training-progress');
+  var context = canvas.getContext('2d');
+  var img = new Image();
+  context.fillStyle = '#333';
+  context.fillText('Loading...', canvas.width / 2 - 30, canvas.height / 3);
+  socket.on('photobooth', function(data) {
+    function arrayBufferToBase64(buffer) {
+      var binary = '';
+      var bytes = new Uint8Array(buffer);
+      var len = bytes.byteLength;
+      for (var i = 0; i < len; i++) {
+        binary += String.fromCharCode(bytes[i]);
+      }
+      return window.btoa(binary);
+    }
+    var str = arrayBufferToBase64(data.buffer);
+    var base64String = str;
+    img.onload = function() {
+      context.drawImage(this, 0, 0, canvas.width, canvas.height);
+    };
+    img.src = 'data:image/png;base64,' + base64String;
+  });
+
+  socket.on('trainingProgress', function(data) {
+    trainingProgressElement.innerHTML = data.length
+  })
+</script>
