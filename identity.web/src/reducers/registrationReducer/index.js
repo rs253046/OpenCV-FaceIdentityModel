@@ -6,9 +6,12 @@ export default function registrationReducer(state = initialState.registration, a
     case actionTypes.REGISTER_USER_SUCCESS:
       const registration = {
         step1: action.registration,
-        step2: {}
+        step2: {},
+        currentStep: 2
       };
       return Object.assign({}, state, registration);
+    case actionTypes.CLEAR_REGISTERED_USER:
+      return Object.assign({}, state, initialState.registration);
     default:
       return state;
   }

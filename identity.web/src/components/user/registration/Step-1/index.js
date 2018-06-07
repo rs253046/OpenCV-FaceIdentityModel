@@ -14,23 +14,16 @@ class RegistrationStep1 extends Component {
     super(props, context);
     this.updateRegistrationState = this.updateRegistrationState.bind(this);
     this.registerUser = this.registerUser.bind(this);
-    this.onStartStream = this.onStartStream.bind(this);
-    this.socket = io.connect('http://172.16.120.87:3000');
+    this.socket = io.connect('http://localhost:3000');
     this.state = {
       registration: { username: '', emailAddress: '' },
       errors: {}
     };
   }
 
-  onStartStream() {
-    this.socket.emit('startStreaming', { userId: 2 });
-  }
-
   registerUser(event) {
     event.preventDefault();
     this.props.actions.registerUser(this.state.registration);
-    this.onStartStream();
-    this.nextStep();
   }
 
   nextStep() {
@@ -45,7 +38,17 @@ class RegistrationStep1 extends Component {
     this.setState({registration});
   }
 
+  transitionToNextStep(currentStep, step1) {
+    this.nextStep();
+  }
+
   render() {
+    const { currentStep, step1 } = this.props.registration;
+
+    if (currentStep === 2) {
+      this.transitionToNextStep(currentStep, step1);
+    }
+
     return (
       <div className="p-8">
         <Card>
@@ -65,7 +68,9 @@ RegistrationStep1.propTypes = {
 };
 
 function mapStateToProps(state, ownProps) {
-  return { };
+  return {
+    registration: state.registration
+  };
 }
 
 function mapDispatchToProps(dispatch) {

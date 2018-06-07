@@ -32,7 +32,9 @@ export default class PhotoboothController {
 
   startLiveVideoStream() {
     const faceBasePath = path.resolve('./lib/training/images');
+    console.log('faceBasePath', faceBasePath);
     const runDetection = faceRecognitionService.makeRunVideoFaceRecognition();
+    console.log('faceBasePath', faceBasePath);
     const socket = this.ioSocket;
     this.captureSnapshots(socket, runDetection, faceBasePath);
   }
@@ -60,6 +62,5 @@ export default class PhotoboothController {
         });
       }
     }, 2000);
-
   }
 }

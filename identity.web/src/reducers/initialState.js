@@ -10,6 +10,7 @@ export default {
   registration: {
     step1: {},
     step2: {},
+    currentStep: 1
   },
   common: {
     applicationError: {

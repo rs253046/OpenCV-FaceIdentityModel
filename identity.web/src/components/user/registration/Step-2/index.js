@@ -5,20 +5,41 @@ import { PropTypes } from 'prop-types';
 import io from 'socket.io-client';
 import { Link } from 'react-router-dom';
 import { APP_ROUTES } from '../../../../constants';
+import { registrationAction } from '../../../../actions';
 
 class RegistrationStep2 extends Component {
 
   constructor(props, context) {
     super(props, context);
-    this.socket = io.connect('http://172.16.120.87:3000');
+    this.validateStep2();
+    this.socket = io.connect('http://localhost:3000');
+    this.onStartStream = this.onStartStream.bind(this);
+    this.onStartStream();
     this.state = {
       progressBarWidth: 0
     }
   }
 
+  validateStep2() {
+    const { history, registration } = this.props;
+    if (registration.currentStep === 1) {
+      history.push('/registration/step1');
+    }
+  }
+
+  onStartStream() {
+    const userId = this.props.registration.step1.id;
+    this.socket.emit('startStreaming', { userId });
+    this.props.actions.clearRegisteredUser();
+  }
+
   componentDidMount() {
     this.streamDataONCanvas();
     this.socket.emit('startCapturing');
+  }
+
+  componentWillUnmount() {
+    this.socket.disconnect();
   }
 
   updateProgressBar(width) {
@@ -81,6 +102,10 @@ class RegistrationStep2 extends Component {
 }
 
 
+RegistrationStep2.propTypes = {
+  actions: PropTypes.object.isRequired
+};
+
 function mapStateToProps(state, ownProps) {
   return {
     registration: state.registration
@@ -89,7 +114,7 @@ function mapStateToProps(state, ownProps) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    actions: {}
+    actions: bindActionCreators(registrationAction, dispatch)
   };
 }
 

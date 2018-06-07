@@ -66,7 +66,7 @@ export default class PhotoboothController {
     snapshotInterval = setInterval(() => {
       const frame = this.videoStream && this.videoStream.snapshot();
       if (fs.readdirSync(faceBasePath).length <= 20 && !!frame && canCapture) {
-        saveFaceImages(frame, detectFaces);
+        saveFaceImages(frame, detectFaces, faceBasePath);
         socket.emit('trainingSet', { length: fs.readdirSync(faceBasePath).length });
       }
     }, 200);

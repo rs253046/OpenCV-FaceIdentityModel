@@ -5,56 +5,27 @@ import { sessionAction } from '../../../actions';
 import { PropTypes } from 'prop-types';
 import { FormatMessage } from '../../common';
 import LoginForm from './LoginForm';
+import { Button } from 'reactstrap';
+import io from 'socket.io-client';
 import './index.css';
 
 class Login extends Component {
 
   constructor(props, context) {
     super(props, context);
-    this.updateUserState = this.updateUserState.bind(this);
+    this.socket = io.connect('http://localhost:3000');
+    this.socket.emit('startRecognitionStreaming');
     this.login = this.login.bind(this);
-    this.state = {
-      user: { username: '', password: '' }
-    };
   }
 
-  updateUserState(event) {
-    const field = event.target.name;
-    const { user } = this.state;
-    user[field] = event.target.value;
 
-    this.setState(prevUser => {
-      return Object.assign({}, prevUser, user);
-    });
+  componentWillUnmount() {
+    this.socket.emit('stopRecognitionStreaming');
+    this.socket.disconnect();
   }
 
   login(event) {
-    event.preventDefault();
-
-    if (this.loginFormIsValid()) {
-      this.props.actions.login(this.state.user);
-    }
-  }
-
-  loginFormIsValid() {
-    const { user } = this.state;
-    this.props.actions.clearSessionError();
-    let formIsValid = true;
-    const errors = {};
-
-    if (user.username.length < 1) {
-      formIsValid = false;
-      errors.username = 'username is required.';
-    }
-
-    if (user.password.length < 1) {
-      formIsValid = false;
-      errors.password = 'password is required.';
-    }
-
-    this.props.actions.setSessionError(errors);
-
-    return formIsValid;
+    this.socket.emit('startRecognitionCapturing');
   }
 
   logout() {
@@ -71,8 +42,7 @@ class Login extends Component {
           <div className="mb-5">
             <h1>Identity</h1>
           </div>
-          <LoginForm onChange={this.updateUserState} user={this.state.user} errors={session.errors}
-            onSubmit={this.login} />
+          <Button type="submit" block onClick={this.login}>Login</Button>
         </div>
       </div>
     );

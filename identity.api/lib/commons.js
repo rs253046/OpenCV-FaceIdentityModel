@@ -5,7 +5,6 @@ import loadFacenet from './dnn/loadFacenet';
 import { extractResults } from './dnn/ssdUtils';
 
 const classifier = new cv.CascadeClassifier(cv.HAAR_FRONTALFACE_ALT2);
-const faceBasePath = path.resolve('./lib/training/images');
 
 const classifyImg = (net, img) => {
   const imgResized = img.resizeToMax(300);
@@ -33,7 +32,7 @@ const makeRunDetectFacenetSSD = () => {
 
 let delay = 0;
 
-const saveFaceImages = (frame, detectFaces) => {
+const saveFaceImages = (frame, detectFaces, faceBasePath) => {
   const frameResized = frame.resizeToMax(800);
   const faceRects = detectFaces(frameResized);
 
@@ -46,7 +45,7 @@ const saveFaceImages = (frame, detectFaces) => {
       faceRects.forEach((faceRect, index) => {
         const faceImageList = fs.readdirSync(faceBasePath);
         const resizedFaceRect = new cv.Rect(faceRect.x - 15, faceRect.y - 15, faceRect.width + 50, faceRect.height + 50);
-        cv.imwrite(`${faceBasePath}/steve_${faceImageList.length + 2}.jpg`, frameResized.getRegion(resizedFaceRect));
+        cv.imwrite(`${faceBasePath}/${guid()}.jpg`, frameResized.getRegion(resizedFaceRect));
         console.log('done')
       });
     }
@@ -81,8 +80,22 @@ const makeRunVideoFaceRecognition = () => {
   const lbph = new cv.LBPHFaceRecognizer(1, 8, 8, 8, 100);
   const basePath = './lib/training';
   const imgsPath = path.resolve(basePath, 'images');
-  const imgFiles = fs.readdirSync(imgsPath);
+  const dir = fs.readdirSync(imgsPath);
+  const imgFiles = [];
+  const labels = [];
   const classifier = new cv.CascadeClassifier(cv.HAAR_FRONTALFACE_ALT2);
+
+  dir.forEach(d => {
+    const a = fs.readdirSync(path.resolve(imgsPath, d));
+    a.forEach(i => {
+      labels.push(parseInt(d, 10));
+      imgFiles.push(path.resolve(imgsPath, d, i));
+    })
+  })
+
+  console.log(labels);
+
+
 
   const getFaceImage = (imgObj) => {
     const { img, filePath} = imgObj;
@@ -92,19 +105,19 @@ const makeRunVideoFaceRecognition = () => {
     }
     return img.getRegion(faceRects[0]);
   };
-
+  console.log(imgFiles);
   const trainImgs = imgFiles
-    .map(file => path.resolve(imgsPath, file))
     .map(filePath => ({ img: cv.imread(filePath), filePath }))
     .map(imgObj =>({ img: imgObj.img.bgrToGray(), filePath: imgObj.filePath }))
     .map(getFaceImage)
     .map(faceImg => faceImg.resize(80, 80));
 
-  const labels = imgFiles
-    .map(file => nameMappings.findIndex(name => file.includes(name)));
-  console.log(labels);
+    console.log(trainImgs);
+
   lbph.train(trainImgs, labels);
 
+  const modelPath = path.resolve(basePath, 'models/1.yaml');
+  lbph.save(modelPath);
   return (frame) => {
     const twoFacesImg = frame;
     const result = classifier.detectMultiScale(twoFacesImg.bgrToGray());
@@ -116,6 +129,7 @@ const makeRunVideoFaceRecognition = () => {
       }
 
       const faceImg = twoFacesImg.getRegion(faceRect).bgrToGray();
+      console.log(lbph.predict(faceImg));
       const who = nameMappings[lbph.predict(faceImg).label] || 'Unknown';
       const rect = cv.drawDetection(
         twoFacesImg,
@@ -142,6 +156,5 @@ export {
   detectFaces,
   makeRunVideoFaceDetection,
   saveFaceImages,
-  makeRunDetectFacenetSSD,
-  faceBasePath
+  makeRunDetectFacenetSSD
 }
