@@ -7,6 +7,10 @@ export default {
     currentUser: null,
     errors: {}
   },
+  registration: {
+    step1: {},
+    step2: {},
+  },
   common: {
     applicationError: {
       isInErrorState: false,

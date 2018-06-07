@@ -1,5 +1,6 @@
 import path from 'path';
 import cv from 'opencv4nodejs';
+import fs from 'fs';
 
 const videoStream = (videoFile = 0) => {
   return {
@@ -42,6 +43,20 @@ const drawGreenRect = (image, rect, opts = { thickness: 2 }) =>
 const drawRedRect = (image, rect, opts = { thickness: 2 }) =>
   drawRect(image, rect, new cv.Vec(0, 0, 255), opts);
 
+const removeDirectory = (path) => {
+  if (fs.existsSync(path)) {
+    fs.readdirSync(path).forEach(function(file, index) {
+      var curPath = path + "/" + file;
+      if (fs.lstatSync(curPath).isDirectory()) {
+        deleteFolderRecursive(curPath);
+      } else {
+        fs.unlinkSync(curPath);
+      }
+    });
+    fs.rmdirSync(path);
+  }
+};
+
 
 export {
   cv,
@@ -50,5 +65,6 @@ export {
   drawBlueRect,
   drawGreenRect,
   drawRedRect,
-  videoStream
+  videoStream,
+  removeDirectory
 }

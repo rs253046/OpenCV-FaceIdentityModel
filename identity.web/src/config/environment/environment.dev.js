@@ -1,6 +1,6 @@
 export default {
   environment: 'development',
-  hosts: 'http://localhost:3000',
+  hosts: 'http://172.16.120.87:3000',
   namespace: '',
   client_id: 'MyGoal.Client',
   client_secret: 'MyGoalSecret1',

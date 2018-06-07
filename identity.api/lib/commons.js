@@ -46,7 +46,7 @@ const saveFaceImages = (frame, detectFaces) => {
       faceRects.forEach((faceRect, index) => {
         const faceImageList = fs.readdirSync(faceBasePath);
         const resizedFaceRect = new cv.Rect(faceRect.x - 15, faceRect.y - 15, faceRect.width + 50, faceRect.height + 50);
-        cv.imwrite(`${faceBasePath}/rahul_${faceImageList.length + 2}.jpg`, frameResized.getRegion(resizedFaceRect));
+        cv.imwrite(`${faceBasePath}/steve_${faceImageList.length + 2}.jpg`, frameResized.getRegion(resizedFaceRect));
         console.log('done')
       });
     }
@@ -77,7 +77,7 @@ const detectFaces = (img) => {
 }
 
 const makeRunVideoFaceRecognition = () => {
-  const nameMappings = ['rahul'];
+  const nameMappings = ['rahul, steve'];
   const lbph = new cv.LBPHFaceRecognizer(1, 8, 8, 8, 100);
   const basePath = './lib/training';
   const imgsPath = path.resolve(basePath, 'images');
@@ -102,14 +102,14 @@ const makeRunVideoFaceRecognition = () => {
 
   const labels = imgFiles
     .map(file => nameMappings.findIndex(name => file.includes(name)));
-
+  console.log(labels);
   lbph.train(trainImgs, labels);
 
   return (frame) => {
     const twoFacesImg = frame;
     const result = classifier.detectMultiScale(twoFacesImg.bgrToGray());
     const minDetections = 10;
-
+    let prediction = [];
     result.objects.forEach((faceRect, i) => {
       if (result.numDetections[i] < minDetections) {
         return;
@@ -130,9 +130,10 @@ const makeRunVideoFaceRecognition = () => {
         [{ text: who + lbph.predict(faceImg).confidence }],
         alpha
       );
+      prediction.push(who);
     });
-
-    return twoFacesImg;
+    prediction = prediction.filter(pre => pre !== 'Unknown');
+    return { twoFacesImg, result: prediction};
   }
 }
 

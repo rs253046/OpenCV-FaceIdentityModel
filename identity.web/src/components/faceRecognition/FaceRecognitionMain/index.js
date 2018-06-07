@@ -14,7 +14,10 @@ class FaceRecognitionMain extends Component {
     this.onCapture = this.onCapture.bind(this);
     this.onStopCapture = this.onStopCapture.bind(this);
     this.onStartStream = this.onStartStream.bind(this);
-    this.socket = io.connect('http://localhost:3000');
+    this.socket = io.connect('http://172.16.120.87:3000');
+    this.state = {
+      persons: []
+    }
   }
 
   componentDidMount(){
@@ -33,11 +36,18 @@ class FaceRecognitionMain extends Component {
     this.socket.emit('stopRecognitionStreaming');
   }
 
+  updatePersons(persons) {
+    this.setState({
+      persons
+    })
+  }
+
   streamDataONCanvas() {
     const canvas = document.getElementById('canvas-video');
     const context = canvas.getContext('2d');
     const img = new Image();
     context.fillStyle = '#333';
+    const self = this;
     context.fillText('Loading...', canvas.width / 2 - 30, canvas.height / 3);
     this.socket.on('recognitionStream', function(data) {
       function arrayBufferToBase64(buffer) {
@@ -56,6 +66,10 @@ class FaceRecognitionMain extends Component {
       };
       img.src = 'data:image/png;base64,' + base64String;
     });
+
+    this.socket.on('recognizedPersons', function(data) {
+      self.updatePersons(data.persons);
+    })
   }
 
   componentWillUnmount() {
@@ -63,11 +77,18 @@ class FaceRecognitionMain extends Component {
   }
 
   generateLayout() {
+    const { persons } = this.state;
+
     return (<div>
       <button className="btn" type="submit" onClick={this.onStartStream}>Start Webcam</button>
       <button className="btn" type="submit" onClick={this.onCapture}>Start Streaming</button>
       <button className="btn" type="submit" onClick={this.onStopCapture}>Stop Webcam</button>
       <Link to={APP_ROUTES.FACE_DETECTION} className="btn">Back to training</Link>
+      <div className="row">
+        <div class="col">
+          {persons}
+        </div>
+      </div>
       <div className="row">
         <div className="col ml-3">
           <canvas id="canvas-video" width="640" height="560" className="border border-secondary rounded"></canvas>

@@ -14,7 +14,7 @@ class FaceDetectionMain extends Component {
     this.onCapture = this.onCapture.bind(this);
     this.onStopCapture = this.onStopCapture.bind(this);
     this.onStartStream = this.onStartStream.bind(this);
-    this.socket = io.connect('http://localhost:3000');
+    this.socket = io.connect('http://172.16.120.87:3000');
 
     this.state = {
       progressBarWidth: 0

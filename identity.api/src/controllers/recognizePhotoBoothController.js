@@ -43,12 +43,23 @@ export default class PhotoboothController {
       createImageBase64Buffer,
     } = faceRecognitionService;
 
+    // videoStreamInterval = setInterval(() => {
+    //   const frame = this.videoStream && this.videoStream.snapshot();
+    //   if (frame && canCapture) {
+    //     const buffer = createImageBase64Buffer(frame);
+    //     socket.emit('recognitionStream', { buffer });
+    //   }
+    // }, 0);
+
     videoStreamInterval = setInterval(() => {
       const frame = this.videoStream && this.videoStream.snapshot();
       if (frame && canCapture) {
-        const buffer = createImageBase64Buffer(runDetection(frame, detectFaces));
-        socket.emit('recognitionStream', { buffer });
+        console.log(runDetection(frame, detectFaces).result);
+        socket.emit('recognizedPersons', {
+          persons: runDetection(frame, detectFaces).result
+        });
       }
-    }, 0);
+    }, 2000);
+
   }
 }

@@ -72,8 +72,8 @@ class HttpService {
   prepareRequest(setting) {
     if (AuthenticationService.isAuthenticated) {
       this.baseConfiguration.headers['Authorization'] = `Bearer ${AuthenticationService.token}`;
-      this.baseConfiguration.baseURL = this.getHost(setting.url) + '/' +environment.namespace;
     }
+    this.baseConfiguration.baseURL = this.getHost(setting.url) + '/' +environment.namespace;
 
     const config = Object.assign({}, this.baseConfiguration, setting);
     return this.makeRequest({

@@ -13,6 +13,8 @@ export default class PhotoboothController {
     this.videoStream = faceRecognitionService.videoStream();
     this.ioSocket.on('connection', (socket) => {
       socket.on('startStreaming', (data) => {
+        console.log(data)
+        this.imagesPath = data.userId || 0;
         canCapture = true;
         this.videoStream.turnOn();
       })
@@ -31,7 +33,8 @@ export default class PhotoboothController {
   }
 
   startLiveVideoStream() {
-    const faceBasePath = path.resolve('./lib/training/images');
+    const faceBasePath = path.resolve(`./lib/training/images/${this.imagesPath}`);
+    console.log(faceBasePath);
     const runDetection = faceRecognitionService.makeRunVideoFaceDetection();
     const socket = this.ioSocket;
     this.captureSnapshots(socket, runDetection, faceBasePath);
@@ -62,7 +65,7 @@ export default class PhotoboothController {
 
     snapshotInterval = setInterval(() => {
       const frame = this.videoStream && this.videoStream.snapshot();
-      if (fs.readdirSync(faceBasePath).length < 200 && !!frame && canCapture) {
+      if (fs.readdirSync(faceBasePath).length <= 20 && !!frame && canCapture) {
         saveFaceImages(frame, detectFaces);
         socket.emit('trainingSet', { length: fs.readdirSync(faceBasePath).length });
       }
