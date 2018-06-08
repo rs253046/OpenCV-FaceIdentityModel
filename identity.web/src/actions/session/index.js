@@ -65,8 +65,8 @@ function login(user) {
 
       dispatch(createSession(session));
     }, error => {
-      dispatch(setSessionError({ loginFailed: 'User name or password is incorrect.' }));
-      throw error;
+      dispatch(setSessionError({ loginFailed: 'Your face identity does not exists.' }));
+      // throw error;
     });
   };
 }

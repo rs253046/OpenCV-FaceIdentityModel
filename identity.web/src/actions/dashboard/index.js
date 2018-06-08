@@ -12,7 +12,6 @@ function streamingEnded(streaming) {
 
 function startStreaming() {
   return function (dispatch) {
-    console.log(API_CONSTANTS.START_STREAMING)
     return HttpService.get(API_CONSTANTS.START_STREAMING).subscribe((res) => {
       dispatch(streamingStart({ streaming: true }));
     });

@@ -4,11 +4,9 @@ import { IntlProvider } from 'react-intl';
 import { mount } from 'enzyme';
 
 function setup(props) {
-  return mount(
-    <IntlProvider locale={'en'} messages={{ 'test.title': 'Test' }}>
-      <FormatMessage {...props} />
-    </IntlProvider>
-  );
+  return mount(<IntlProvider locale={'en'} messages={{ 'test.title': 'Test' }}>
+    <FormatMessage {...props} />
+  </IntlProvider>);
 }
 
 describe('This Format message should', () => {

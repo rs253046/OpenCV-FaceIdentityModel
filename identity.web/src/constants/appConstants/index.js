@@ -14,6 +14,9 @@ const APP_CONSTANTS = {
       PUT: 'PUT',
       DELETE: 'DELETE'
     }
+  },
+  REG_EXP: {
+    EMAIL: '^[^\s@]+@[^\s@]+\.[^\s@]+$'
   }
 };
 

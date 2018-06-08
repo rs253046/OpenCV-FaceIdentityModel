@@ -1,5 +1,5 @@
-import  { makeRunVideoFaceDetection, saveFaceImages, detectFaces, makeRunVideoFaceRecognition } from '../../lib/commons';
-import  { videoStream } from '../../lib/utils';
+import  { makeRunVideoFaceDetection, saveFaceImages, detectFaces, makeRunVideoFaceRecognition, trainFaceIdentityModel } from '../../lib/commons';
+import  { videoStream, calculateMaxPrediction } from '../../lib/utils';
 import cv from 'opencv4nodejs';
 
 class faceRecognitionService {
@@ -26,6 +26,14 @@ class faceRecognitionService {
   createImageBase64Buffer(image) {
     const outBase64 = cv.imencode('.jpg', image).toString('base64');
     return Buffer.from(outBase64, 'base64');
+  }
+
+  trainFaceIdentityModel() {
+    return trainFaceIdentityModel()
+  }
+
+  calculateMaxPrediction(results) {
+    return calculateMaxPrediction(results);
   }
 }
 

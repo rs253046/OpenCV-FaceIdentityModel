@@ -17,20 +17,7 @@ class RegistrationStep2 extends Component {
     this.onStartStream();
     this.state = {
       progressBarWidth: 0
-    }
-  }
-
-  validateStep2() {
-    const { history, registration } = this.props;
-    if (registration.currentStep === 1) {
-      history.push('/registration/step1');
-    }
-  }
-
-  onStartStream() {
-    const userId = this.props.registration.step1.id;
-    this.socket.emit('startStreaming', { userId });
-    this.props.actions.clearRegisteredUser();
+    };
   }
 
   componentDidMount() {
@@ -42,16 +29,29 @@ class RegistrationStep2 extends Component {
     this.socket.disconnect();
   }
 
+  onStartStream() {
+    const userId = this.props.registration.step1.id;
+    this.socket.emit('startStreaming', { userId });
+    this.props.actions.clearRegisteredUser();
+  }
+
+  validateStep2() {
+    const { history, registration } = this.props;
+    if (registration.currentStep === 1) {
+      history.push('/registration/step1');
+    }
+  }
+
   updateProgressBar(width) {
     this.setState({
       progressBarWidth: width
-    })
+    });
   }
 
   streamDataONCanvas() {
     this.socket.on('trainingSet', (data) => {
       this.updateProgressBar((data.length * 100)/20);
-    })
+    });
   }
 
   registrationProgressBar() {
@@ -66,7 +66,7 @@ class RegistrationStep2 extends Component {
         <div className="row">
           <div className="col">
             <div className="progress mb-1">
-              <div className="progress-bar bg-success progress-bar-striped" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style={{width: progressBarWidth + '%'}}>
+              <div className="progress-bar bg-success progress-bar-striped" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style={{ width: progressBarWidth + '%' }}>
                 {progressBarWidth}% Trained
               </div>
             </div>
@@ -78,11 +78,17 @@ class RegistrationStep2 extends Component {
 
   registrationSuccess() {
     this.socket.emit('stopStreaming');
+    this.socket.emit('starTrainingIdentityModel');
     return (
-      <div>
-        <Link className="btn btn-primary" to={ APP_ROUTES.LOGIN }>
-          Back to Login
-        </Link>
+      <div className="p-8">
+        <div>
+          <h1>Your identity is succesfully registered.</h1>
+        </div>
+        <div class="text-right w-50">
+          <Link className="btn btn-primary" to={APP_ROUTES.LOGIN}>
+            Back to Login
+          </Link>
+        </div>
       </div>
     );
   }
@@ -90,7 +96,7 @@ class RegistrationStep2 extends Component {
   renderStep2() {
     const { progressBarWidth } = this.state;
 
-    const registrationProgress =  progressBarWidth < 100 ?
+    const registrationProgress = progressBarWidth < 100 ?
       this.registrationProgressBar(): this.registrationSuccess();
     return registrationProgress;
   }

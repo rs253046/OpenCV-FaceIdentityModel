@@ -32,35 +32,47 @@ export default class PhotoboothController {
 
   startLiveVideoStream() {
     const faceBasePath = path.resolve('./lib/training/images');
-    console.log('faceBasePath', faceBasePath);
-    const runDetection = faceRecognitionService.makeRunVideoFaceRecognition();
-    console.log('faceBasePath', faceBasePath);
-    const socket = this.ioSocket;
-    this.captureSnapshots(socket, runDetection, faceBasePath);
+    try {
+      const runDetection = faceRecognitionService.makeRunVideoFaceRecognition();
+      const socket = this.ioSocket;
+      this.captureSnapshots(socket, runDetection, faceBasePath);
+    }
+    catch(err) {
+      this.videoStream.turnOff();
+    }
   }
 
   captureSnapshots(socket, runDetection, faceBasePath) {
     const {
       detectFaces,
       createImageBase64Buffer,
+      calculateMaxPrediction
     } = faceRecognitionService;
 
-    // videoStreamInterval = setInterval(() => {
-    //   const frame = this.videoStream && this.videoStream.snapshot();
-    //   if (frame && canCapture) {
-    //     const buffer = createImageBase64Buffer(frame);
-    //     socket.emit('recognitionStream', { buffer });
-    //   }
-    // }, 0);
-
-    videoStreamInterval = setInterval(() => {
+    let counter = 10;
+    let results = [];
+    while (counter > 0) {
       const frame = this.videoStream && this.videoStream.snapshot();
       if (frame && canCapture) {
-        console.log(runDetection(frame, detectFaces).result);
-        socket.emit('recognizedPersons', {
-          persons: runDetection(frame, detectFaces).result
-        });
+        results = results.concat(runDetection(frame, detectFaces).result);
+        console.log(results);
       }
-    }, 2000);
+      counter = counter - 1;
+
+      if (counter === 0) {
+        if (results.length > 0) {
+          results = results.sort(function(a, b){
+          	return a.confidence-b.confidence
+          });
+        }
+
+        console.log(results);
+        const prediction = results[0].label;
+        socket.emit('recognizedPerson', {
+          prediction
+        });
+        this.videoStream.turnOff();
+      }
+    }
   }
 }

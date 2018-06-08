@@ -1,9 +1,9 @@
-import React, {Component} from 'react';
-import {connect} from 'react-redux';
-import {bindActionCreators} from 'redux';
+import React, { Component } from 'react';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
 import { dashboardAction, commonAction } from '../../../actions';
 import { APP_ROUTES } from '../../../constants';
-import {PropTypes} from 'prop-types';
+import { PropTypes } from 'prop-types';
 import io from 'socket.io-client';
 import { Link } from 'react-router-dom';
 
@@ -18,16 +18,16 @@ class FaceDetectionMain extends Component {
 
     this.state = {
       progressBarWidth: 0
-    }
+    };
   }
 
   updateProgressBar(width) {
     this.setState({
       progressBarWidth: width
-    })
+    });
   }
 
-  componentDidMount(){
+  componentDidMount() {
     this.streamDataONCanvas();
   }
 
@@ -49,12 +49,12 @@ class FaceDetectionMain extends Component {
     const img = new Image();
     context.fillStyle = '#333';
     context.fillText('Loading...', canvas.width / 2 - 30, canvas.height / 3);
-    this.socket.on('detectionStream', function(data) {
+    this.socket.on('detectionStream', (data) => {
       function arrayBufferToBase64(buffer) {
         let binary = '';
         const bytes = new Uint8Array(buffer);
         const len = bytes.byteLength;
-        for (var i = 0; i < len; i++) {
+        for (let i = 0; i < len; i++) {
           binary += String.fromCharCode(bytes[i]);
         }
         return window.btoa(binary);
@@ -69,7 +69,7 @@ class FaceDetectionMain extends Component {
 
     this.socket.on('trainingSet', (data) => {
       this.updateProgressBar(data.length/2);
-    })
+    });
   }
 
   componentWillUnmount() {
@@ -87,11 +87,11 @@ class FaceDetectionMain extends Component {
       <div className="row">
         <div className="col ml-3">
           <div className="progress w-45 mb-1">
-            <div className="progress-bar bg-success progress-bar-striped" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style={{width: progressBarWidth + '%'}}>
+            <div className="progress-bar bg-success progress-bar-striped" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style={{ width: progressBarWidth + '%' }}>
               {progressBarWidth}% Trained
             </div>
           </div>
-          <canvas id="canvas-video" width="640" height="560" className="border border-secondary rounded"></canvas>
+          <canvas id="canvas-video" width="640" height="560" className="border border-secondary rounded" />
         </div>
       </div>
     </div>);

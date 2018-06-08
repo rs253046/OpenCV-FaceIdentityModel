@@ -15,7 +15,7 @@ const RegistrationForm = ({ registration, errors, onChange, onSubmit }) => {
       <FormGroup row>
         <Label for="userEmail" sm={2} size="md">Email</Label>
         <Col sm={10}>
-          <TextInput identifier="emailAddress" name="emailAddress" value={registration.emailAddress} onChange={onChange} error={errors.emailAddress} placeholder="Email Address"/>
+          <TextInput type="email" identifier="emailAddress" name="emailAddress" value={registration.emailAddress} onChange={onChange} error={errors.emailAddress} placeholder="Email Address"/>
         </Col>
       </FormGroup>
       <Button type="submit" block onClick={onSubmit}>Next</Button>

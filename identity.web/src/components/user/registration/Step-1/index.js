@@ -3,10 +3,10 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { PropTypes } from 'prop-types';
 import RegistrationForm from './RegistrationForm';
-import { Card, CardImg, CardText, CardBody,
-  CardTitle, CardSubtitle, Button,CardHeader} from 'reactstrap';
 import { registrationAction } from '../../../../actions';
 import io from 'socket.io-client';
+import { emailValidator, requiredValidator } from '../../../../utils';
+import { Card, CardImg, CardText, CardBody, CardTitle, CardSubtitle, Button, CardHeader } from 'reactstrap';
 
 class RegistrationStep1 extends Component {
 
@@ -23,7 +23,34 @@ class RegistrationStep1 extends Component {
 
   registerUser(event) {
     event.preventDefault();
-    this.props.actions.registerUser(this.state.registration);
+    if (this.isValidRegistrationForm()) {
+      this.props.actions.registerUser(this.state.registration);
+    }
+  }
+
+  isValidRegistrationForm() {
+    const { registration } = this.state;
+    let formIsValid = true;
+    const errors = {};
+
+    if (!requiredValidator(registration.username)) {
+      formIsValid = false;
+      errors.username = 'username is required.';
+    }
+
+    if (!requiredValidator(registration.emailAddress)) {
+      formIsValid = false;
+      errors.emailAddress = 'email is required.';
+    } else {
+      if(!emailValidator(registration.emailAddress)) {
+        formIsValid = false;
+        errors.emailAddress = 'Please enter correct email.';
+      }
+    }
+
+    this.setState({ errors });
+
+    return formIsValid;
   }
 
   nextStep() {
@@ -35,7 +62,7 @@ class RegistrationStep1 extends Component {
     const field = event.target.name;
     const { registration } = this.state;
     registration[field] = event.target.value;
-    this.setState({registration});
+    this.setState({ registration });
   }
 
   transitionToNextStep(currentStep, step1) {
@@ -52,10 +79,10 @@ class RegistrationStep1 extends Component {
     return (
       <div className="p-8">
         <Card>
-         <CardHeader>Registration</CardHeader>
+          <CardHeader>Registration</CardHeader>
           <CardBody>
             <RegistrationForm onChange={this.updateRegistrationState} registration={this.state.registration} errors={this.state.errors}
-            onSubmit={this.registerUser} />
+              onSubmit={this.registerUser} />
           </CardBody>
         </Card>
       </div>

@@ -48,7 +48,7 @@ class App extends Component {
     const { session } = this.props;
     return (
       <div className="app-container">
-        { session.isAuthenticated && <HeaderBar currentUser={ session.currentUser }/> }
+        { session.isAuthenticated && <HeaderBar currentUser={session.currentUser}/> }
         { this.renderRoutes() }
         { session.isAuthenticated && <FooterBar/> }
       </div>

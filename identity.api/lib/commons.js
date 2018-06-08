@@ -75,49 +75,56 @@ const detectFaces = (img) => {
   return classifier.detectMultiScaleGpu(img.bgrToGray(), options).objects;
 }
 
+
+const trainFaceIdentityModel = () => {
+  return new Promise((resolve, reject) => {
+    const lbph = new cv.LBPHFaceRecognizer(1, 8, 8, 8, 90);
+    const imagesSourcePath = path.resolve('lib/training/images');
+    const imagesSourceDirectory = fs.readdirSync(imagesSourcePath);
+    const classifier = new cv.CascadeClassifier(cv.HAAR_FRONTALFACE_ALT2);
+    const imageFiles = [];
+    const imagelabels = [];
+
+    imagesSourceDirectory.forEach(imagesSourceSubDirectory => {
+      const imageFilesList = fs.readdirSync(path.resolve(imagesSourcePath, imagesSourceSubDirectory));
+      imageFilesList.forEach(imagePath => {
+        imagelabels.push(parseInt(imagesSourceSubDirectory, 10));
+        imageFiles.push(path.resolve(imagesSourcePath, imagesSourceSubDirectory, imagePath));
+      });
+    });
+
+    const getFaceImage = (imgObj) => {
+      const { img, filePath} = imgObj;
+      const faceRects = classifier.detectMultiScale(img).objects;
+      if (!faceRects.length) {
+        throw new Error(`failed to detect ${filePath}`);
+      }
+      return img.getRegion(faceRects[0]);
+    };
+
+    const trainImages = imageFiles
+      .map(filePath => ({ img: cv.imread(filePath), filePath }))
+      .map(imgObj =>({ img: imgObj.img.bgrToGray(), filePath: imgObj.filePath }))
+      .map(getFaceImage)
+      .map(faceImg => faceImg.resize(80, 80));
+    const modelFilePath = path.resolve('lib/training/models/identityModel.yaml');
+    lbph.train(trainImages, imagelabels);
+    lbph.save(modelFilePath);
+    resolve();
+  });
+}
+
 const makeRunVideoFaceRecognition = () => {
-  const nameMappings = ['rahul, steve'];
-  const lbph = new cv.LBPHFaceRecognizer(1, 8, 8, 8, 100);
-  const basePath = './lib/training';
-  const imgsPath = path.resolve(basePath, 'images');
-  const dir = fs.readdirSync(imgsPath);
-  const imgFiles = [];
-  const labels = [];
-  const classifier = new cv.CascadeClassifier(cv.HAAR_FRONTALFACE_ALT2);
+  const lbph = new cv.LBPHFaceRecognizer(1, 8, 8, 8, 90);
+  const modelFilePath = path.resolve('lib/training/models/identityModel.yaml');
 
-  dir.forEach(d => {
-    const a = fs.readdirSync(path.resolve(imgsPath, d));
-    a.forEach(i => {
-      labels.push(parseInt(d, 10));
-      imgFiles.push(path.resolve(imgsPath, d, i));
-    })
-  })
+  if (fs.existsSync(modelFilePath)) {
+    lbph.load(modelFilePath);
+  } else {
+    trainFaceIdentityModel();
+    lbph.load(modelFilePath);
+  }
 
-  console.log(labels);
-
-
-
-  const getFaceImage = (imgObj) => {
-    const { img, filePath} = imgObj;
-    const faceRects = classifier.detectMultiScale(img).objects;
-    if (!faceRects.length) {
-      throw new Error(`failed to detect ${filePath}`);
-    }
-    return img.getRegion(faceRects[0]);
-  };
-  console.log(imgFiles);
-  const trainImgs = imgFiles
-    .map(filePath => ({ img: cv.imread(filePath), filePath }))
-    .map(imgObj =>({ img: imgObj.img.bgrToGray(), filePath: imgObj.filePath }))
-    .map(getFaceImage)
-    .map(faceImg => faceImg.resize(80, 80));
-
-    console.log(trainImgs);
-
-  lbph.train(trainImgs, labels);
-
-  const modelPath = path.resolve(basePath, 'models/1.yaml');
-  lbph.save(modelPath);
   return (frame) => {
     const twoFacesImg = frame;
     const result = classifier.detectMultiScale(twoFacesImg.bgrToGray());
@@ -128,26 +135,11 @@ const makeRunVideoFaceRecognition = () => {
         return;
       }
 
-      const faceImg = twoFacesImg.getRegion(faceRect).bgrToGray();
-      console.log(lbph.predict(faceImg));
-      const who = nameMappings[lbph.predict(faceImg).label] || 'Unknown';
-      const rect = cv.drawDetection(
-        twoFacesImg,
-        faceRect,
-        { color: new cv.Vec(255, 0, 0), segmentFraction: 4 }
-      );
-
-      const alpha = 0.4;
-      cv.drawTextBox(
-        twoFacesImg,
-        new cv.Point(rect.x, rect.y + rect.height + 10),
-        [{ text: who + lbph.predict(faceImg).confidence }],
-        alpha
-      );
-      prediction.push(who);
+      const faceImg = twoFacesImg.getRegion(faceRect).resize(80, 80).bgrToGray();
+      prediction.push(lbph.predict(faceImg));
     });
-    prediction = prediction.filter(pre => pre !== 'Unknown');
-    return { twoFacesImg, result: prediction};
+    prediction = prediction.filter(pre => pre.label > -1);
+    return { result: prediction };
   }
 }
 
@@ -156,5 +148,6 @@ export {
   detectFaces,
   makeRunVideoFaceDetection,
   saveFaceImages,
-  makeRunDetectFacenetSSD
+  makeRunDetectFacenetSSD,
+  trainFaceIdentityModel
 }

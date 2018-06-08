@@ -2,8 +2,44 @@ export default {
   users: [{
     id: 1,
     username: 'rahul',
-    password: 'identity',
-    token: 'MTQ0NjJkZmQ5OTM2NDE1ZTZjNGZmZjI3',
-    emailAddress: 'rahul.singh4@globallogic.com'
+    emailAddress: 'sdf',
+    token: 'sdgdsgdsgsdfgs',
+    password: 'identity'
+  }, {
+    id: 2,
+    username: 'rahul',
+    emailAddress: 'q@g.com',
+    token: '3fea23f2-04d1-c804-f90a-010881b0def1',
+    password: 'identity'
+  }, {
+    id: 3,
+    username: 'kshitiz',
+    emailAddress: 'kshitiz@gmail.com',
+    token: 'b0f880f3-cdf1-0fbf-6725-89f1e713aec3',
+    password: 'identity'
+  }, {
+    id: 4,
+    username: 'shubhamkaushal',
+    emailAddress: 'shubham.kaushal@globallogic.com',
+    token: 'ed5d2f03-b5b0-160c-928e-1eb0d511930e',
+    password: 'identity'
+  }, {
+    id: 5,
+    username: 'manish',
+    emailAddress: 'manish@gmail.com',
+    token: '7e5aa10a-9ad7-64f3-4d16-93c0403d6781',
+    password: 'identity'
+  }, {
+    id: 6,
+    username: 'ajay',
+    emailAddress: 'ajay@singh',
+    token: '7f77dadd-5165-c1a3-4188-4ef1f14a0ca9',
+    password: 'identity'
+  }, {
+    id: 7,
+    username: 'Kshitij.Arora',
+    emailAddress: 'kshitij.arora@globallogic.com',
+    token: '0cb3fd2e-6d24-20a8-7071-c0e64f1136e3',
+    password: 'identity'
   }]
 }

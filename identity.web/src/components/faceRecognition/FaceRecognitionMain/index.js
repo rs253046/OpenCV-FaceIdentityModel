@@ -1,8 +1,8 @@
-import React, {Component} from 'react';
-import {connect} from 'react-redux';
-import {bindActionCreators} from 'redux';
-import {dashboardAction, commonAction} from '../../../actions';
-import {PropTypes} from 'prop-types';
+import React, { Component } from 'react';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { dashboardAction, commonAction } from '../../../actions';
+import { PropTypes } from 'prop-types';
 import io from 'socket.io-client';
 import { Link } from 'react-router-dom';
 import { APP_ROUTES } from '../../../constants';
@@ -17,10 +17,10 @@ class FaceRecognitionMain extends Component {
     this.socket = io.connect('http://172.16.120.87:3000');
     this.state = {
       persons: []
-    }
+    };
   }
 
-  componentDidMount(){
+  componentDidMount() {
     this.streamDataONCanvas();
   }
 
@@ -39,7 +39,7 @@ class FaceRecognitionMain extends Component {
   updatePersons(persons) {
     this.setState({
       persons
-    })
+    });
   }
 
   streamDataONCanvas() {
@@ -49,12 +49,12 @@ class FaceRecognitionMain extends Component {
     context.fillStyle = '#333';
     const self = this;
     context.fillText('Loading...', canvas.width / 2 - 30, canvas.height / 3);
-    this.socket.on('recognitionStream', function(data) {
+    this.socket.on('recognitionStream', (data) => {
       function arrayBufferToBase64(buffer) {
         let binary = '';
         const bytes = new Uint8Array(buffer);
         const len = bytes.byteLength;
-        for (var i = 0; i < len; i++) {
+        for (let i = 0; i < len; i++) {
           binary += String.fromCharCode(bytes[i]);
         }
         return window.btoa(binary);
@@ -67,9 +67,9 @@ class FaceRecognitionMain extends Component {
       img.src = 'data:image/png;base64,' + base64String;
     });
 
-    this.socket.on('recognizedPersons', function(data) {
+    this.socket.on('recognizedPersons', (data) => {
       self.updatePersons(data.persons);
-    })
+    });
   }
 
   componentWillUnmount() {
@@ -85,13 +85,13 @@ class FaceRecognitionMain extends Component {
       <button className="btn" type="submit" onClick={this.onStopCapture}>Stop Webcam</button>
       <Link to={APP_ROUTES.FACE_DETECTION} className="btn">Back to training</Link>
       <div className="row">
-        <div class="col">
+        <div className="col">
           {persons}
         </div>
       </div>
       <div className="row">
         <div className="col ml-3">
-          <canvas id="canvas-video" width="640" height="560" className="border border-secondary rounded"></canvas>
+          <canvas id="canvas-video" width="640" height="560" className="border border-secondary rounded" />
         </div>
       </div>
     </div>);

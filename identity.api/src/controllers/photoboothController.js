@@ -29,6 +29,10 @@ export default class PhotoboothController {
       socket.on('startCapturing', (data) => {
         this.startLiveVideoStream();
       })
+
+      socket.on('starTrainingIdentityModel', (data) => {
+        this.startTrainingIdentityModel();
+      })
     });
   }
 
@@ -71,5 +75,11 @@ export default class PhotoboothController {
       }
     }, 200);
     socket.emit('trainingSet', { length: fs.readdirSync(faceBasePath).length });
+  }
+
+  startTrainingIdentityModel() {
+    faceRecognitionService.trainFaceIdentityModel().then(() => {
+      console.log('sdfgsdfgsdfg');
+    });
   }
 }

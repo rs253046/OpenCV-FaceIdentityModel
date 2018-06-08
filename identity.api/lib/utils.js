@@ -25,6 +25,22 @@ const videoStream = (videoFile = 0) => {
   }
 }
 
+
+const calculateMaxPrediction = (store) => {
+  let frequency = {};
+  let max = 0;
+  let result;
+  for(let v in store) {
+    frequency[store[v]]=(frequency[store[v]] || 0)+1;
+    if(frequency[store[v]] > max) {
+      max = frequency[store[v]];
+      result = store[v];
+    }
+  }
+
+  return result;
+}
+
 const drawRect = (image, rect, color, opts = {
   thickness: 2
 }) => image.drawRectangle(rect, color, opts.thickness, cv.LINE_8);
@@ -66,5 +82,6 @@ export {
   drawGreenRect,
   drawRedRect,
   videoStream,
-  removeDirectory
+  removeDirectory,
+  calculateMaxPrediction
 }

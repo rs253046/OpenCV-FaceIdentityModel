@@ -15,10 +15,29 @@ export default class RegistrationController {
   post(req, res) {
     const newUser = this.createUser(req.body);
     db.users.push(newUser);
-    console.log(db);
+    this.writeDBFile(newUser);
     res.status(200).json({
       id: newUser.id
     });
+  }
+
+  writeDBFile(user) {
+    const dbPath = path.resolve('lib/database/user.js');
+    const contentbefore = fs.readFileSync(dbPath, 'utf-8');
+    
+    const newContent = `}, {
+    id: ${user.id},
+    username: '${user.username}',
+    emailAddress: '${user.emailAddress}',
+    token: '${user.token}',
+    password: '${user.password}'
+  }]`;
+
+    fs.exists(dbPath, function (exists) {
+      if (exists) {
+        fs.writeFileSync(dbPath, contentbefore.replace('}]', newContent), 'utf-8');
+      }
+    })
   }
 
   createUserIdentity(userDirectory) {

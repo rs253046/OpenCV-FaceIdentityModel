@@ -5,7 +5,7 @@ import { API_CONSTANTS } from '../../constants';
 function registerUser(registrationDetails) {
   return function (dispatch) {
     return HttpService.post(API_CONSTANTS.REGISTRATION.REGISTER_USER, registrationDetails).subscribe((response) => {
-      const user = {id: response.id, ...registrationDetails};
+      const user = { id: response.id, ...registrationDetails };
       dispatch(registerUserSuccess(user));
     });
   };
@@ -16,7 +16,7 @@ function registerUserSuccess(registration) {
 }
 
 function clearRegisteredUser() {
-  return {type: actionTypes.CLEAR_REGISTERED_USER }
+  return { type: actionTypes.CLEAR_REGISTERED_USER };
 }
 
 export default {
