@@ -16,7 +16,7 @@ const APP_CONSTANTS = {
     }
   },
   REG_EXP: {
-    EMAIL: '^[^\s@]+@[^\s@]+\.[^\s@]+$'
+    EMAIL: '^[^\s@]+@[^\s@]+\.[^\s@]+$' //eslint-disable-line no-useless-escape
   }
 };
 

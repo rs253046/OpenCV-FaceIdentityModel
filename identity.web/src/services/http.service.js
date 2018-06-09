@@ -13,7 +13,8 @@ class HttpService {
     headers: {
       'Cache-Control': 'no-cache',
       'Pragma': 'no-cache'
-    }
+    },
+    skipLoader: false
   };
   _retryRequestAttempts = 3; // eslint-disable-line no-magic-numbers
   _retryStatusCodes = [502, 0]; // eslint-disable-line no-magic-numbers
@@ -35,11 +36,12 @@ class HttpService {
     return this.prepareRequest(setting);
   }
 
-  post(url, data) {
+  post(url, data, options = {}) {
     const setting = {
       method: APP_CONSTANTS.HTTP.METHOD.POST,
       url,
-      data
+      data,
+      ...options
     };
 
     return this.prepareRequest(setting);
@@ -117,7 +119,7 @@ class HttpService {
 
   registerRequestInterceptor() {
     axios.interceptors.request.use((config) => {
-      if (!this._isHttpLoading) {
+      if (!this._isHttpLoading && !config.skipLoader) {
         this._isHttpLoading = true;
         this.httpLoadingEvent.next({ isHttpLoading: this._isHttpLoading });
       }
@@ -130,7 +132,7 @@ class HttpService {
   registerResponseInterceptor() {
     axios.interceptors.response.use((response) => {
       this._pendingRequests--;
-      if (this._pendingRequests === 0) { // eslint-disable-line no-magic-numbers
+      if (this._pendingRequests === 0 && !response.config.skipLoader) { // eslint-disable-line no-magic-numbers
         this._isHttpLoading = false;
         this.httpLoadingEvent.next({ isHttpLoading: this._isHttpLoading });
       }

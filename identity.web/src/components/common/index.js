@@ -9,7 +9,7 @@ import CheckBox from './form/CheckBox';
 import DatePickerInput from './form/DatePickerInput';
 import HeaderBar from './HeaderBar';
 import FooterBar from './FooterBar';
-
+import Webcam from './Webcam';
 export {
   RouteHandler,
   FormatMessage,
@@ -21,5 +21,6 @@ export {
   CheckBox,
   DatePickerInput,
   HeaderBar,
-  FooterBar
+  FooterBar,
+  Webcam
 };

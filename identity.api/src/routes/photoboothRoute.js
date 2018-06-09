@@ -5,9 +5,8 @@ const photoboothRouter = express.Router();
 
 const photoboothRoute = (ioSocket) => {
   const photoboothController = new PhotoboothController(ioSocket);
-  // photoboothRouter.route('/startStreaming').get(photoboothController.startStreaming);
-  // photoboothRouter.route('/stopStreaming').get(photoboothController.stopStreaming);
-  // photoboothRouter.route('/').get(photoboothController.getIndex);
+  photoboothRouter.route('/saveSnapshots').post(photoboothController.saveSnapshots);
+  photoboothRouter.route('/trainIdentityModel').post(photoboothController.trainIdentityModel);
   return photoboothRouter;
 }
 

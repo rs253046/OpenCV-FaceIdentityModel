@@ -3,10 +3,6 @@ import { Navbar, Nav, NavItem, NavLink } from 'reactstrap';
 
 export default class FooterBar extends React.Component {
 
-  constructor(props, context) {
-    super(props, context);
-  }
-
   render() {
     return (
       <div>

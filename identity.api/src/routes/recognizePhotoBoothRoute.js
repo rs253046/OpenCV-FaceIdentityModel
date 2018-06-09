@@ -6,9 +6,7 @@ const recognizePhotoBoothRouter = express.Router();
 
 const recognizePhotoBooth = (ioSocket) => {
   const recognizePhotoBoothController = new RecognizePhotoBoothController(ioSocket);
-  // recognizePhotoBoothRouter.route('/startStreaming').get(recognizePhotoBoothController.startStreaming);
-  // recognizePhotoBoothRouter.route('/stopStreaming').get(recognizePhotoBoothController.stopStreaming);
-  // recognizePhotoBoothRouter.route('/').get(recognizePhotoBoothController.getIndex);
+  recognizePhotoBoothRouter.route('/recognizeStream').post(recognizePhotoBoothController.recognizeStream);
   return recognizePhotoBoothRouter;
 }
 

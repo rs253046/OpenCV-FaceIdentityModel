@@ -1,7 +1,7 @@
 import React from 'react';
-import { Col, Form, FormGroup, Label, Input, Button } from 'reactstrap';
+import { Col, Form, FormGroup, Label, Button } from 'reactstrap';
 import PropTypes from 'prop-types';
-import { FormatMessage, TextInput } from '../../../../common';
+import { TextInput } from '../../../../common';
 
 const RegistrationForm = ({ registration, errors, onChange, onSubmit }) => {
   return (

@@ -3,19 +3,8 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { dashboardAction, commonAction } from '../../../actions';
 import { PropTypes } from 'prop-types';
-import { FormatMessage } from '../../common';
-import HttpService from '../../../services/http.service';
-import io from 'socket.io-client';
-import { Link } from 'react-router-dom';
-import { APP_ROUTES } from '../../../constants';
 
 class DashboardMain extends Component {
-  socket;
-  constructor(props, context) {
-    super(props, context);
-  }
-
-
   generateLayout() {
     const { session } = this.props;
     return (<div className="p-5">
@@ -54,6 +43,7 @@ function mapStateToProps(state, ownProps) {
 
 DashboardMain.propTypes = {
   dashboard: PropTypes.object.isRequired,
+  session: PropTypes.object.isRequired,
   actions: PropTypes.object.isRequired
 };
 

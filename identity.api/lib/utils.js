@@ -25,6 +25,13 @@ const videoStream = (videoFile = 0) => {
   }
 }
 
+const convertBase64ImageToBuffer = image => {
+  const extension = image.split(';')[0].match(/jpeg|png|gif/)[0];
+  const data = image.replace(/^data:image\/\w+;base64,/, "");
+  const buffer = new Buffer(data, 'base64');
+  return {buffer, extension };
+}
+
 
 const calculateMaxPrediction = (store) => {
   let frequency = {};
@@ -83,5 +90,6 @@ export {
   drawRedRect,
   videoStream,
   removeDirectory,
-  calculateMaxPrediction
+  calculateMaxPrediction,
+  convertBase64ImageToBuffer
 }

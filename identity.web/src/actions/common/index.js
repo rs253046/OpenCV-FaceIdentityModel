@@ -1,6 +1,4 @@
 import actionTypes from '../actionType';
-import io from 'socket.io-client';
-
 
 function setApplicationErrorState(error) {
   return { type: actionTypes.SET_APPLICATION_ERROR_STATE, error };
@@ -19,7 +17,6 @@ function hideLoader() {
 }
 
 function connectToSocket(socket) {
-
   return { type: actionTypes.CONNECT_TO_SOCKET, socket };
 }
 

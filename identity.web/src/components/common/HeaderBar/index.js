@@ -1,6 +1,7 @@
 import React from 'react';
 import { APP_ROUTES } from '../../../constants';
 import { Link } from 'react-router-dom';
+import { PropTypes } from 'prop-types';
 import {
   Collapse, Navbar, NavbarToggler, NavbarBrand, Nav,
   NavItem, NavLink, UncontrolledDropdown, DropdownToggle,
@@ -52,3 +53,7 @@ export default class HeaderBar extends React.Component {
     );
   }
 }
+
+HeaderBar.propTypes = {
+  currentUser: PropTypes.object.isRequired
+};

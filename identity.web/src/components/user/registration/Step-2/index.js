@@ -2,37 +2,53 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { PropTypes } from 'prop-types';
-import io from 'socket.io-client';
 import { Link } from 'react-router-dom';
 import { APP_ROUTES } from '../../../../constants';
 import { registrationAction } from '../../../../actions';
+import { Webcam } from '../../../common';
+import { HttpService } from '../../../../services';
 
 class RegistrationStep2 extends Component {
-
   constructor(props, context) {
     super(props, context);
     this.validateStep2();
-    this.socket = io.connect('http://localhost:3000');
-    this.onStartStream = this.onStartStream.bind(this);
-    this.onStartStream();
-    this.state = {
-      progressBarWidth: 0
+    this.state = this.getInitialState(props);
+    this.onSnap = this.onSnap.bind(this);
+    this.props.actions.clearRegisteredUser();
+  }
+
+  getInitialState(props) {
+    return {
+      progressBarWidth: 0,
+      turnOff: false,
+      turnOn: false,
+      snapCount: 0,
+      id: props.registration.step1.id
     };
   }
 
   componentDidMount() {
-    this.streamDataONCanvas();
-    this.socket.emit('startCapturing');
+    this.captureImageSet();
   }
 
   componentWillUnmount() {
-    this.socket.disconnect();
+    this.turnOff();
   }
 
-  onStartStream() {
-    const userId = this.props.registration.step1.id;
-    this.socket.emit('startStreaming', { userId });
-    this.props.actions.clearRegisteredUser();
+  captureImageSet() {
+    this.turnOn();
+    const interval = setInterval(() => {
+      if (this.state.progressBarWidth === 100) {
+        this.trainIdentityModel();
+        this.turnOff();
+        clearInterval(interval);
+      }
+      this.takeSnap();
+    }, 200);
+  }
+
+  trainIdentityModel() {
+    HttpService.post('/trainIdentityModel', {}).subscribe(() => {});
   }
 
   validateStep2() {
@@ -43,15 +59,7 @@ class RegistrationStep2 extends Component {
   }
 
   updateProgressBar(width) {
-    this.setState({
-      progressBarWidth: width
-    });
-  }
-
-  streamDataONCanvas() {
-    this.socket.on('trainingSet', (data) => {
-      this.updateProgressBar((data.length * 100)/20);
-    });
+    this.setState({ progressBarWidth: width });
   }
 
   registrationProgressBar() {
@@ -77,14 +85,12 @@ class RegistrationStep2 extends Component {
   }
 
   registrationSuccess() {
-    this.socket.emit('stopStreaming');
-    this.socket.emit('starTrainingIdentityModel');
     return (
       <div className="p-8">
         <div>
           <h1>Your identity is succesfully registered.</h1>
         </div>
-        <div class="text-right w-50">
+        <div className="text-right w-50">
           <Link className="btn btn-primary" to={APP_ROUTES.LOGIN}>
             Back to Login
           </Link>
@@ -93,23 +99,57 @@ class RegistrationStep2 extends Component {
     );
   }
 
+  turnOn() {
+    this.setState({
+      turnOn: true,
+      turnOff: false
+    });
+  }
+
+  turnOff() {
+    this.setState({
+      turnOff: true,
+      turnOn: false,
+      snapCount: 0
+    });
+  }
+
+  takeSnap() {
+    this.setState(prevState => {
+      return { snapCount: prevState.snapCount + 1 };
+    });
+  }
+
+  onSnap(data) {
+    const payload = { data, userId: this.state.id };
+    const options = { skipLoader: true };
+    HttpService.post('/saveSnapshots', payload, options).subscribe((res) => {
+      this.updateProgressBar((res.faceCount * 100)/20);
+    });
+  }
+
   renderStep2() {
     const { progressBarWidth } = this.state;
-
     const registrationProgress = progressBarWidth < 100 ?
       this.registrationProgressBar(): this.registrationSuccess();
     return registrationProgress;
   }
 
   render() {
-    const { progressBarWidth } = this.state;
-    return this.renderStep2();
+    const { turnOn, turnOff, snapCount } = this.state;
+    return (
+      <div>
+        {this.renderStep2()}
+        <Webcam turnOn={turnOn} turnOff={turnOff} onSnap={this.onSnap} snap={snapCount} />
+      </div>
+    );
   }
 }
 
-
 RegistrationStep2.propTypes = {
-  actions: PropTypes.object.isRequired
+  actions: PropTypes.object.isRequired,
+  history: PropTypes.object.isRequired,
+  registration: PropTypes.object.isRequired
 };
 
 function mapStateToProps(state, ownProps) {

@@ -30,26 +30,17 @@ const makeRunDetectFacenetSSD = () => {
   }
 }
 
-let delay = 0;
-
 const saveFaceImages = (frame, detectFaces, faceBasePath) => {
   const frameResized = frame.resizeToMax(800);
   const faceRects = detectFaces(frameResized);
-
   if (faceRects.length) {
-    delay = delay + delay;
+    faceRects.forEach((faceRect, index) => {
+      const faceImageList = fs.readdirSync(faceBasePath);
+      const resizedFaceRect = new cv.Rect(faceRect.x - 15, faceRect.y - 15, faceRect.width + 50, faceRect.height + 50);
+      cv.imwrite(`${faceBasePath}/${guid()}.jpg`, frameResized.getRegion(resizedFaceRect));
+      console.log('done')
+    });
   }
-
-  setTimeout(() => {
-    if (faceRects.length) {
-      faceRects.forEach((faceRect, index) => {
-        const faceImageList = fs.readdirSync(faceBasePath);
-        const resizedFaceRect = new cv.Rect(faceRect.x - 15, faceRect.y - 15, faceRect.width + 50, faceRect.height + 50);
-        cv.imwrite(`${faceBasePath}/${guid()}.jpg`, frameResized.getRegion(resizedFaceRect));
-        console.log('done')
-      });
-    }
-  }, delay);
 }
 
 const makeRunVideoFaceDetection = () =>  {
@@ -138,7 +129,7 @@ const makeRunVideoFaceRecognition = () => {
       const faceImg = twoFacesImg.getRegion(faceRect).resize(80, 80).bgrToGray();
       prediction.push(lbph.predict(faceImg));
     });
-    prediction = prediction.filter(pre => pre.label > -1);
+
     return { result: prediction };
   }
 }

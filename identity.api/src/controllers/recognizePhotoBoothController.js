@@ -3,76 +3,33 @@ import config from '../../config/environment';
 import cv from 'opencv4nodejs';
 import fs from 'fs';
 import path from 'path';
+import { convertBase64ImageToBuffer } from '../../lib/utils';
 
-let videoStreamInterval;
-let snapshotInterval;
-let canCapture = false;
 export default class PhotoboothController {
-  constructor(ioSocket) {
-    this.ioSocket = ioSocket;
-    this.videoStream = faceRecognitionService.videoStream();
-    this.ioSocket.on('connection', (socket) => {
-      socket.on('startRecognitionStreaming', (data) => {
-        canCapture = true;
-        this.videoStream.turnOn();
-      })
-
-      socket.on('stopRecognitionStreaming', (data) => {
-        clearInterval(videoStreamInterval);
-        clearInterval(snapshotInterval);
-        canCapture = false;
-        this.videoStream.turnOff();
-      })
-
-      socket.on('startRecognitionCapturing', (data) => {
-        this.startLiveVideoStream();
-      })
-    });
-  }
-
-  startLiveVideoStream() {
+  recognizeStream(req, res) {
+    const { saveFaceImages, detectFaces } = faceRecognitionService;
+    const { data } = req.body;
     const faceBasePath = path.resolve('./lib/training/images');
-    try {
-      const runDetection = faceRecognitionService.makeRunVideoFaceRecognition();
-      const socket = this.ioSocket;
-      this.captureSnapshots(socket, runDetection, faceBasePath);
-    }
-    catch(err) {
-      this.videoStream.turnOff();
-    }
-  }
-
-  captureSnapshots(socket, runDetection, faceBasePath) {
-    const {
-      detectFaces,
-      createImageBase64Buffer,
-      calculateMaxPrediction
-    } = faceRecognitionService;
-
-    let counter = 10;
+    const frames = data.map(base64Image => cv.imdecode(convertBase64ImageToBuffer(base64Image).buffer));
     let results = [];
-    while (counter > 0) {
-      const frame = this.videoStream && this.videoStream.snapshot();
-      if (frame && canCapture) {
+    frames.forEach(frame => {
+      try {
+        const runDetection = faceRecognitionService.makeRunVideoFaceRecognition();
         results = results.concat(runDetection(frame, detectFaces).result);
-        console.log(results);
       }
-      counter = counter - 1;
+      catch(err) { }
+    })
 
-      if (counter === 0) {
-        if (results.length > 0) {
-          results = results.sort(function(a, b){
-          	return a.confidence-b.confidence
-          });
-        }
+    results = results.filter(result => result.label > -1);
 
-        console.log(results);
-        const prediction = results[0].label;
-        socket.emit('recognizedPerson', {
-          prediction
-        });
-        this.videoStream.turnOff();
-      }
+    if (results.length > 0) {
+      results = results.sort((a, b) => {
+        return a.confidence - b.confidence;
+      });
     }
+    console.log(results);
+
+    const prediction = results[0];
+    res.status(200).json({prediction: prediction});
   }
 }

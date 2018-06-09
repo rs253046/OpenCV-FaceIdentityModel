@@ -10,25 +10,18 @@ import { PropTypes } from 'prop-types';
 import messages from '../translations';
 import { commonAction } from '../actions';
 import { HttpService } from '../services';
-import io from 'socket.io-client';
 import './App.css';
 
 class App extends Component {
   constructor(props, context) {
     super(props, context);
     this.setupLoadingIndicator(props);
-    this.setupSocket(props);
   }
 
   setupLoadingIndicator({ actions }) {
     HttpService.httpLoadingEvent.subscribe((loadingEvent) => {
       loadingEvent.isHttpLoading ? actions.showLoader() : actions.hideLoader();
     });
-  }
-
-  setupSocket({ actions }) {
-    // const socket = io.connect('http://localhost:3000');
-    // actions.connectToSocket(socket)
   }
 
   generateLayout() {

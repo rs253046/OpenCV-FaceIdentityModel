@@ -6,7 +6,7 @@ import RegistrationForm from './RegistrationForm';
 import { registrationAction } from '../../../../actions';
 import io from 'socket.io-client';
 import { emailValidator, requiredValidator } from '../../../../utils';
-import { Card, CardImg, CardText, CardBody, CardTitle, CardSubtitle, Button, CardHeader } from 'reactstrap';
+import { Card, CardText, CardBody, CardHeader } from 'reactstrap';
 
 class RegistrationStep1 extends Component {
 
@@ -79,7 +79,7 @@ class RegistrationStep1 extends Component {
     return (
       <div className="p-8">
         <Card>
-          <CardHeader>Registration</CardHeader>
+          <CardHeader><CardText>Registration</CardText></CardHeader>
           <CardBody>
             <RegistrationForm onChange={this.updateRegistrationState} registration={this.state.registration} errors={this.state.errors}
               onSubmit={this.registerUser} />
@@ -91,7 +91,12 @@ class RegistrationStep1 extends Component {
 }
 
 RegistrationStep1.propTypes = {
-  actions: PropTypes.object.isRequired
+  actions: PropTypes.object.isRequired,
+  history: PropTypes.object.isRequired,
+  registration: PropTypes.shape({
+    step1: PropTypes.object.isRequired,
+    currentStep: PropTypes.number.isRequired
+  })
 };
 
 function mapStateToProps(state, ownProps) {
