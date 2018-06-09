@@ -5,7 +5,7 @@ const userRouter = express.Router();
 const userRoute = () => {
   const userController = new UserController();
   userRouter.use('/', userController.authenticationMiddleware);
-  userRouter.route('/').get(userController.get);
+  userRouter.route('/userInfo').get(userController.get);
   return userRouter;
 }
 

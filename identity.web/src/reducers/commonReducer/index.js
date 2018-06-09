@@ -11,8 +11,6 @@ export default function commonReducer(state = initialState.common, action) {
       return Object.assign({}, state, { loadingIndicator: action.loadingIndicator });
     case actionTypes.HIDE_LOADER:
       return Object.assign({}, state, { loadingIndicator: action.loadingIndicator });
-    case actionTypes.CONNECT_TO_SOCKET:
-      return Object.assign({}, state, { socket: action.socket });
     default:
       return state;
   }

@@ -55,5 +55,5 @@ export default class HeaderBar extends React.Component {
 }
 
 HeaderBar.propTypes = {
-  currentUser: PropTypes.object.isRequired
+  currentUser: PropTypes.object
 };

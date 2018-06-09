@@ -4,7 +4,7 @@ import path from 'path';
 import { convertBase64ImageToBuffer } from '../../lib/utils';
 import faceRecognitionService from '../services/faceRecognitionService';
 
-export default class PhotoboothController {
+export default class TrainingController {
 
   saveSnapshots(req, res) {
     const { saveFaceImages, detectFaces } = faceRecognitionService;

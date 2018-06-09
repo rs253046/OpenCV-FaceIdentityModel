@@ -19,7 +19,6 @@ export default {
     },
     loadingIndicator: {
       isLoading: false
-    },
-    socket: null
+    }
   }
 };

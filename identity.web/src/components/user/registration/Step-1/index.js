@@ -4,7 +4,6 @@ import { bindActionCreators } from 'redux';
 import { PropTypes } from 'prop-types';
 import RegistrationForm from './RegistrationForm';
 import { registrationAction } from '../../../../actions';
-import io from 'socket.io-client';
 import { emailValidator, requiredValidator } from '../../../../utils';
 import { Card, CardText, CardBody, CardHeader } from 'reactstrap';
 
@@ -14,7 +13,6 @@ class RegistrationStep1 extends Component {
     super(props, context);
     this.updateRegistrationState = this.updateRegistrationState.bind(this);
     this.registerUser = this.registerUser.bind(this);
-    this.socket = io.connect('http://localhost:3000');
     this.state = {
       registration: { username: '', emailAddress: '' },
       errors: {}

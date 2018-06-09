@@ -54,7 +54,7 @@ class Login extends Component {
 
   recognizeIdentity() {
     const payload = { data: this.recognitionData };
-    HttpService.post('recognizePhotoBooth/recognizeStream', payload).subscribe((res) => {
+    HttpService.post('recognition/predictions', payload).subscribe((res) => {
       this.props.actions.login({
         username: res.prediction && res.prediction.label,
         password: 'identity'
@@ -65,6 +65,7 @@ class Login extends Component {
   }
 
   login() {
+    this.props.actions.clearSessionError();
     this.captureImageSet();
   }
 
@@ -142,7 +143,6 @@ Login.propTypes = {
 };
 
 function mapDispatchToProps(dispatch) {
-
   return {
     actions: bindActionCreators({ ...sessionAction, ...commonAction }, dispatch)
   };

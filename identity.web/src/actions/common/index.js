@@ -16,19 +16,9 @@ function hideLoader() {
   return { type: actionTypes.HIDE_LOADER, loadingIndicator: { isLoading: false }};
 }
 
-function connectToSocket(socket) {
-  return { type: actionTypes.CONNECT_TO_SOCKET, socket };
-}
-
-function disconnectSocket() {
-  return { type: actionTypes.DISCONNECT_SOCKET, socket: null };
-}
-
 export default {
   setApplicationErrorState,
   clearApplicationErrorState,
   showLoader,
-  hideLoader,
-  connectToSocket,
-  disconnectSocket
+  hideLoader
 };

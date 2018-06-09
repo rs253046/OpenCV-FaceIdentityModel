@@ -48,7 +48,7 @@ class RegistrationStep2 extends Component {
   }
 
   trainIdentityModel() {
-    HttpService.post('/trainIdentityModel', {}).subscribe(() => {});
+    HttpService.post('training/trainIdentityModel', {}).subscribe(() => {});
   }
 
   validateStep2() {
@@ -123,7 +123,7 @@ class RegistrationStep2 extends Component {
   onSnap(data) {
     const payload = { data, userId: this.state.id };
     const options = { skipLoader: true };
-    HttpService.post('/saveSnapshots', payload, options).subscribe((res) => {
+    HttpService.post('training/saveSnapshots', payload, options).subscribe((res) => {
       this.updateProgressBar((res.faceCount * 100)/20);
     });
   }

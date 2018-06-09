@@ -3,8 +3,8 @@ import http from 'http';
 import config from './config/environment';
 import exphbs from 'express-handlebars';
 import io from 'socket.io';
-import photoboothRoute from './src/routes/photoboothRoute';
-import recognizePhotoBooth from './src/routes/recognizePhotoBoothRoute';
+import trainingRoute from './src/routes/trainingRoute';
+import recognitionRoute from './src/routes/recognitionRoute';
 import authenticationRoute from './src/routes/authenticationRoute';
 import registrationRoute from './src/routes/registrationRoute';
 import userRoute from './src/routes/userRoute';
@@ -29,13 +29,14 @@ app.use((req, res, next) => {
 
 app.set('view engine', '.hbs');
 app.set('views', config.paths.viewsDirectory);
-
 app.use(express.static(__dirname + '/public'));
-app.use('/', photoboothRoute(ioSocket));
+
+app.use('/training', trainingRoute(ioSocket));
 app.use('/token', authenticationRoute());
-app.use('/recognizePhotoBooth', recognizePhotoBooth(ioSocket));
-app.use('/user/userInfo', userRoute());
+app.use('/recognition', recognitionRoute(ioSocket));
+app.use('/user', userRoute());
 app.use('/registration', registrationRoute());
+
 httpServer.listen(port, function(server) {
   console.log('Listening on port %d', port);
 });
