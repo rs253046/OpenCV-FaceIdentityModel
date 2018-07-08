@@ -10,7 +10,8 @@ import { Button } from 'reactstrap';
 import './index.css';
 import { Link } from 'react-router-dom';
 import { HttpService } from '../../../services';
-
+import { timer } from 'rxjs';
+import { take } from 'rxjs/operators';
 class Login extends Component {
   constructor(props, context) {
     super(props, context);
@@ -37,29 +38,43 @@ class Login extends Component {
     this.props.actions.showLoader();
     this.turnOn();
 
-    let count = 50;
-    const interval = setInterval(() => {
-
-      if (count < 1) {
+    timer(1000, 1000).pipe(take(1)).subscribe(
+      () => this.takeSnap(), 
+      () => {}, 
+      () => {
         this.recognizeIdentity();
         this.turnOff();
-        clearInterval(interval);
       }
-
-      this.takeSnap();
-      count--;
-    }, 100);
-
+    );
   }
 
   recognizeIdentity() {
-    const payload = { data: this.recognitionData };
-    HttpService.post('recognition/predictions', payload).subscribe((res) => {
-      this.props.actions.login({
-        username: res.prediction && res.prediction.label,
-        password: 'identity'
+    const payload = { 
+      data: this.recognitionData[0],
+      returnFaceId: true,
+      returnFaceLandmarks: true,
+      returnFaceAttributes: 'age,gender,headPose,smile,facialHair,glasses,emotion,hair,makeup,occlusion,accessories,blur,exposure,noise'
+    };  
+    HttpService.post('faceApi/detect', payload).subscribe(faceInfo => {
+      if (faceInfo.length === 0) {
+        this.props.actions.setSessionError({ loginFailed: 'No face detected.' });
+        return false;
+      }
+      
+      HttpService.post('faceApi/identify', {
+        faceIds: faceInfo.map(i => i.faceId),
+        personGroupId: 1
+      }).subscribe((res) => {
+        this.props.actions.login({
+          username: JSON.stringify({ faceInfo: faceInfo[0], personId: res[0].candidates[0] && res[0].candidates[0].personId }),
+          password: 'identity'
+        });
+      }, error => {
+        this.props.actions.setSessionError({ loginFailed: error.data.data.error.message });
+        this.props.actions.hideLoader();
       });
     }, error => {
+      this.props.actions.setSessionError({ loginFailed: error.data.data.error.message });
       this.props.actions.hideLoader();
     });
   }

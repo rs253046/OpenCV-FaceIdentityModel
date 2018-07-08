@@ -28,10 +28,24 @@ function logout() {
   };
 }
 
+function loadUserProfilePic(profilePic) {
+  return { type: actionTypes.USER_PROFILE_PIC, profilePic: { profilePic: profilePic.data }};
+}
+
+function getUserProfilePic(userInfo) {
+  return function (dispatch) {
+    return HttpService.get(API_CONSTANTS.AUTHENTICATION.USER_PROFILE_PIC, { userId: userInfo.id })
+      .subscribe((profilePic) => {
+        dispatch(loadUserProfilePic(profilePic));
+        dispatch(loadUserInfo(userInfo));
+      });
+  }; 
+}
+
 function getUser() {
   return function (dispatch) {
     return HttpService.get(API_CONSTANTS.AUTHENTICATION.USER_INFO).subscribe((userInfo) => {
-      dispatch(loadUserInfo(userInfo));
+      dispatch(getUserProfilePic(userInfo));
     });
   };
 }

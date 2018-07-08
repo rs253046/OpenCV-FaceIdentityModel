@@ -8,7 +8,9 @@ export default function sessionReducer(state = initialState.session, action) {
     case actionTypes.INVALIDATE_SESSION:
       return Object.assign({}, state, action.session);
     case actionTypes.LOAD_USER_INFO:
-      return Object.assign({}, state, { currentUser: action.userInfo });
+      return Object.assign({}, state, { currentUser: Object.assign({}, state.currentUser, action.userInfo) });
+    case actionTypes.USER_PROFILE_PIC:
+      return Object.assign({}, state, { currentUser: action.profilePic });
     case actionTypes.SET_SESSION_ERRORS:
       return Object.assign({}, state, { errors: action.error });
     case actionTypes.CLEAR_SESSION_ERRORS:

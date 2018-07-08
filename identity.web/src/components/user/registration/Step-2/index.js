@@ -7,7 +7,8 @@ import { APP_ROUTES } from '../../../../constants';
 import { registrationAction } from '../../../../actions';
 import { Webcam } from '../../../common';
 import { HttpService } from '../../../../services';
-
+import { timer, zip } from 'rxjs';
+import { take, tap } from 'rxjs/operators';
 class RegistrationStep2 extends Component {
   constructor(props, context) {
     super(props, context);
@@ -23,7 +24,9 @@ class RegistrationStep2 extends Component {
       turnOff: false,
       turnOn: false,
       snapCount: 0,
-      id: props.registration.step1.id
+      id: props.registration.step1.id,
+      personId: props.registration.step1.personId,
+      binaries: []
     };
   }
 
@@ -37,18 +40,27 @@ class RegistrationStep2 extends Component {
 
   captureImageSet() {
     this.turnOn();
-    const interval = setInterval(() => {
-      if (this.state.progressBarWidth === 100) {
+    timer(1000, 1000).pipe(take(2)).subscribe(
+      () => this.takeSnap(), 
+      () => {}, 
+      () => {
         this.trainIdentityModel();
         this.turnOff();
-        clearInterval(interval);
       }
-      this.takeSnap();
-    }, 200);
+    );
   }
 
   trainIdentityModel() {
-    HttpService.post('training/trainIdentityModel', {}).subscribe(() => {});
+    const request = this.state.binaries.map((binarie, index) => {
+      const payload = { data: this.state.binaries[0], personGroupId: 1, personId: this.state.personId };
+      return HttpService.post('faceApi/addFace', payload).pipe(tap(val => this.updateProgressBar(this.state.progressBarWidth + 50)));
+    });
+
+    request.push(HttpService.post('training/saveSnapshots', { data: this.state.binaries[0], userId: this.state.id }));
+
+    zip(...request).subscribe(response => 
+      HttpService.post('faceApi/trainPersonGroup', { personGroupId: 1 })
+        .subscribe(() => this.setState({ binaries: [] })));
   }
 
   validateStep2() {
@@ -121,10 +133,9 @@ class RegistrationStep2 extends Component {
   }
 
   onSnap(data) {
-    const payload = { data, userId: this.state.id };
-    const options = { skipLoader: true };
-    HttpService.post('training/saveSnapshots', payload, options).subscribe((res) => {
-      this.updateProgressBar((res.faceCount * 100)/20);
+    this.updateProgressBar(50);
+    this.setState(prevState => {
+      return { binaries: [...prevState.binaries, data] };
     });
   }
 

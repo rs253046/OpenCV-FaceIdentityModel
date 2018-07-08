@@ -5,7 +5,7 @@ import { PropTypes } from 'prop-types';
 import {
   Collapse, Navbar, NavbarToggler, NavbarBrand, Nav,
   NavItem, NavLink, UncontrolledDropdown, DropdownToggle,
-  DropdownMenu, DropdownItem
+  DropdownMenu, DropdownItem, Media
 } from 'reactstrap';
 
 export default class HeaderBar extends React.Component {
@@ -26,6 +26,7 @@ export default class HeaderBar extends React.Component {
 
   render() {
     const { currentUser } = this.props;
+    const profilePic = `data:image/jpeg;base64, ${currentUser && currentUser.profilePic}`;
     return (
       <div>
         <Navbar color="dark" dark expand="md">
@@ -35,6 +36,9 @@ export default class HeaderBar extends React.Component {
             <Nav className="ml-auto" navbar>
               <NavItem>
                 <NavLink>Hi, {currentUser && currentUser.username}</NavLink>
+              </NavItem>
+              <NavItem>
+                <Media object src={profilePic} className="rounded-circle" height="40" width="40"/>
               </NavItem>
               <UncontrolledDropdown nav inNavbar>
                 <DropdownToggle nav caret />
