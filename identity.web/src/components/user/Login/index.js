@@ -126,16 +126,16 @@ class Login extends Component {
     return (
       <div className="loginContainer clearfix p-8 vh">
         <div className="gradient-effect" />
-        <div className="w-30 mt-13">
-          <div className="mb-5">
+        <div className="w-30 mt-25 ml-40">
+          <div className="mb-4 w-80 text-center login-register">
             <h1>Face Identity</h1>
           </div>
           <Webcam turnOn={turnOn} turnOff={turnOff} onSnap={this.onSnap} snap={snapCount} />
-          <Button type="submit" block onClick={this.login}>Login</Button>
+          <button type="submit" onClick={this.login} className="btn w-80 login-button">Login</button>
           <h6 className="text-danger">{error}</h6>
-          <div>
-            <Link to={APP_ROUTES.REGISTRATION.STEP_1}>
-              Click here to register yor identity.
+          <div className="w-80 text-center">
+            <Link to={APP_ROUTES.REGISTRATION.STEP_1} className="login-register">
+              Click here to register your identity.
             </Link>
           </div>
         </div>
