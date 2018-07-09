@@ -1,5 +1,5 @@
 import express from 'express';
-import FaceApiController from '../controllers/faceApiController';
+import FaceApiController from '../../controllers/microsoftFaceApi/faceApiController';
 
 const faceApiRouter = express.Router();
 
@@ -10,7 +10,7 @@ const faceApiRoute = () => {
   faceApiRouter.route('/deletePersonGroup').delete(faceApiController.deletePersonGroup);
   faceApiRouter.route('/updatePersonGroup').patch(faceApiController.updatePersonGroup);
   faceApiRouter.route('/getPersonGroup').get(faceApiController.getPersonGroup);
-  faceApiRouter.route('/getPersonGroups').post(faceApiController.getPersonGroups);
+  faceApiRouter.route('/getPersonGroups').get(faceApiController.getPersonGroups);
   faceApiRouter.route('/getPersonGroupTrainingStatus').get(faceApiController.getPersonGroupTrainingStatus);
   faceApiRouter.route('/trainPersonGroup').post(faceApiController.trainPersonGroup);
 
@@ -31,5 +31,7 @@ const faceApiRoute = () => {
 
   return faceApiRouter;
 }
+
+
 
 export default faceApiRoute;

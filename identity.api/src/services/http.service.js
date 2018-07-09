@@ -1,27 +1,37 @@
-import { Observable, of, throwError, BehaviorSubject } from 'rxjs';
+import {
+  Observable,
+  of ,
+  throwError,
+  BehaviorSubject
+} from 'rxjs';
 import axios from 'axios';
-import environment from '../config/environment';
-import { map, retryWhen, takeWhile, switchMap } from 'rxjs/operators';
-import AuthenticationService from './authentication.service';
-import { APP_CONSTANTS } from '../constants';
+import environment from '../../config/environment';
+import {
+  map,
+  retryWhen,
+  takeWhile,
+  switchMap
+} from 'rxjs/operators';
+import APP_CONSTANTS from '../constants/appConstants';
 
 class HttpService {
-  baseConfiguration = {
-    url: '',
-    method: APP_CONSTANTS.HTTP.METHOD.GET,
-    baseURL: '',
-    headers: {
-      'Cache-Control': 'no-cache',
-      'Pragma': 'no-cache'
-    }
-  };
-  _retryRequestAttempts = 3; // eslint-disable-line no-magic-numbers
-  _retryStatusCodes = [502, 0]; // eslint-disable-line no-magic-numbers
-  _pendingRequests = 0; // eslint-disable-line no-magic-numbers
-  _isHttpLoading = false;
-  httpLoadingEvent = new BehaviorSubject({ isHttpLoading: this._isHttpLoading });
-
   constructor() {
+    this.baseConfiguration = {
+      url: '',
+      method: APP_CONSTANTS.HTTP.METHOD.GET,
+      baseURL: '',
+      headers: {
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache'
+      }
+    };
+    this._retryRequestAttempts = 3; // eslint-disable-line no-magic-numbers
+    this._retryStatusCodes = [502, 0]; // eslint-disable-line no-magic-numbers
+    this._pendingRequests = 0; // eslint-disable-line no-magic-numbers
+    this._isHttpLoading = false;
+    this.httpLoadingEvent = new BehaviorSubject({
+      isHttpLoading: this._isHttpLoading
+    });
     this.registerInterceptors();
   }
 
@@ -29,36 +39,50 @@ class HttpService {
     const setting = {
       method: APP_CONSTANTS.HTTP.METHOD.GET,
       url,
-      params
+      ...params
     };
 
     return this.prepareRequest(setting);
   }
 
-  post(url, data) {
+  post(url, data, params = {}) {
     const setting = {
       method: APP_CONSTANTS.HTTP.METHOD.POST,
       url,
-      data
+      data,
+      ...params
     };
 
     return this.prepareRequest(setting);
   }
 
-  put(url, data) {
+  put(url, data, params = {}) {
     const setting = {
       method: APP_CONSTANTS.HTTP.METHOD.PUT,
       url,
-      data
+      data,
+      ...params
     };
 
     return this.prepareRequest(setting);
   }
 
-  del(url) {
+  patch(url, data, params = {}) {
+    const setting = {
+      method: APP_CONSTANTS.HTTP.METHOD.PATCH,
+      url,
+      data,
+      ...params
+    };
+
+    return this.prepareRequest(setting);
+  }
+
+  del(url, params = {}) {
     const setting = {
       method: APP_CONSTANTS.HTTP.METHOD.DELETE,
-      url
+      url,
+      ...params
     };
 
     return this.prepareRequest(setting);
@@ -70,11 +94,6 @@ class HttpService {
   }
 
   prepareRequest(setting) {
-    if (AuthenticationService.isAuthenticated) {
-      this.baseConfiguration.headers['Authorization'] = `Bearer ${AuthenticationService.token}`;
-      this.baseConfiguration.baseURL = this.getHost(setting.url) + '/' +environment.namespace;
-    }
-
     const config = Object.assign({}, this.baseConfiguration, setting);
     return this.makeRequest({
       ...config
@@ -82,7 +101,10 @@ class HttpService {
   }
 
   makeRequest(request) {
-    const { _retryRequestAttempts, _retryStatusCodes } = this;
+    const {
+      _retryRequestAttempts,
+      _retryStatusCodes
+    } = this;
     return new Observable((o) => {
       const source = axios.CancelToken.source();
       o.add(() => source.cancel('Operation canceled by the user.'));
@@ -119,10 +141,12 @@ class HttpService {
     axios.interceptors.request.use((config) => {
       if (!this._isHttpLoading) {
         this._isHttpLoading = true;
-        this.httpLoadingEvent.next({ isHttpLoading: this._isHttpLoading });
+        this.httpLoadingEvent.next({
+          isHttpLoading: this._isHttpLoading
+        });
       }
 
-      this._pendingRequests ++;
+      this._pendingRequests++;
       return config;
     }, error => Promise.reject(error));
   }
@@ -132,7 +156,9 @@ class HttpService {
       this._pendingRequests--;
       if (this._pendingRequests === 0) { // eslint-disable-line no-magic-numbers
         this._isHttpLoading = false;
-        this.httpLoadingEvent.next({ isHttpLoading: this._isHttpLoading });
+        this.httpLoadingEvent.next({
+          isHttpLoading: this._isHttpLoading
+        });
       }
       return response;
     }, error => Promise.reject(error));

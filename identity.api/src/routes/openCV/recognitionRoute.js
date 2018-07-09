@@ -1,6 +1,6 @@
 import express from 'express';
-import RecognitionController from '../controllers/recognitionController';
-import faceRecognitionService from '../services/faceRecognitionService';
+import RecognitionController from '../../controllers/openCV/recognitionController';
+import faceRecognitionService from '../../services/faceRecognitionService';
 
 const recognitionRouter = express.Router();
 

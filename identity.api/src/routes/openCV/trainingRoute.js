@@ -1,6 +1,6 @@
 import express from 'express';
-import TrainingController from '../controllers/trainingController';
-import faceRecognitionService from '../services/faceRecognitionService';
+import TrainingController from '../../controllers/openCV/trainingController';
+import faceRecognitionService from '../../services/faceRecognitionService';
 const trainingRouter = express.Router();
 
 const trainingRoute = (ioSocket) => {

@@ -1,4 +1,5 @@
 import db from '../../lib/database/user';
+import faceDB from '../../lib/database/faceInfo';
 class AuthenticationService {
 
   constructor() {
@@ -29,7 +30,12 @@ class AuthenticationService {
       return this.currentUser;
     }
 
-    return db.users.find(user => user.token === header.split(' ')[1]);
+    const user = db.users.find(user => user.token === header.split(' ')[1]);
+    const faceInfo = faceDB.users.filter(faceInfo => {
+      return user.personId === faceInfo.faceInfo.personId;
+    });
+
+    return {...user, ...faceInfo[faceInfo.length -1]};
   }
 }
 

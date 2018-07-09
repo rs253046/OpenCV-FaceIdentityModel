@@ -1,11 +1,11 @@
-import config from '../config/environment';
+import config from '../../config/environment';
 import HttpService from './http.service';
 
 class MicrosoftFaceApiService {
   createPersonGroup(personGroupId, groupInfo) {
     const headers = this.getHeaders();
     const url = `${config.microsoftFaceApi.endpoint}/persongroups/${personGroupId}`;
-    return HttpService.post(url, groupInfo, headers);
+    return HttpService.put(url, groupInfo, headers);
   }
 
   deletePersonGroup(personGroupId) {
@@ -20,7 +20,7 @@ class MicrosoftFaceApiService {
     return HttpService.patch(url, groupInfo, headers);
   }
 
-  getPersonGroup() {
+  getPersonGroup(personGroupId) {
     const headers = this.getHeaders();
     const url = `${config.microsoftFaceApi.endpoint}/persongroups/${personGroupId}`;
     return HttpService.get(url, headers);
@@ -76,13 +76,16 @@ class MicrosoftFaceApiService {
 
   addFace(personGroupId, personId, data) {
     const headers = this.getHeaders();
+    headers.headers['Content-Type'] = "application/octet-stream";
     const url = `${config.microsoftFaceApi.endpoint}/persongroups/${personGroupId}/persons/${personId}/persistedFaces`;
     return HttpService.post(url, data, headers);
   }
 
-  deleteFace() {
+  deleteFace(personGroupId, personId, persistedFaceId) {
     const headers = this.getHeaders();
-    const url = `${config.microsoftFaceApi.endpoint}/persongroups/${personGroupId}/persons/${personId}/persistedFaces`;
+    headers.headers['Content-Type'] = "application/octet-stream";
+    const url =
+      `${config.microsoftFaceApi.endpoint}/persongroups/${personGroupId}/persons/${personId}/persistedFaces/${persistedFaceId}`;
     return HttpService.del(url, headers);
   }
 
@@ -100,12 +103,14 @@ class MicrosoftFaceApiService {
 
   updateFace(personGroupId, personId, persistedFaceId, data) {
     const headers = this.getHeaders();
+    headers.headers['Content-Type'] = "application/octet-stream";
     const url = `${config.microsoftFaceApi.endpoint}/persongroups/${personGroupId}/persons/${personId}/persistedFaces/${persistedFaceId}`;
     return HttpService.patch(url, data, headers);
   }
 
-  detect() {
+  detect(data, returnFaceId, returnFaceLandmarks, returnFaceAttributes) {
     const headers = this.getHeaders();
+    headers.headers['Content-Type'] = "application/octet-stream";
     const url = `${config.microsoftFaceApi.endpoint}/detect?returnFaceId=${returnFaceId}&returnFaceLandmarks=${returnFaceLandmarks}&returnFaceAttributes=${returnFaceAttributes}`;
     return HttpService.post(url, data, headers);
   }
@@ -118,8 +123,10 @@ class MicrosoftFaceApiService {
 
   getHeaders() {
     return {
-      'Content-Type': 'application/json',
-      'Ocp-Apim-Subscription-Key': config.microsoftFaceApi.keys[1]
+      headers: {
+        'Content-Type': 'application/json',
+        'Ocp-Apim-Subscription-Key': config.microsoftFaceApi.keys[1]
+      }
     }
   }
 }

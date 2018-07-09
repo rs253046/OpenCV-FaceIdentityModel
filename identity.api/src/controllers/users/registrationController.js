@@ -1,11 +1,9 @@
-import authenticationService from '../services/authenticationService';
-import db from '../../lib/database/user';
+import microsoftFaceApiService from '../../services/microsoftFaceApiService';
+import db from '../../../lib/database/user';
 import fs from 'fs';
 import path from 'path';
-import {
-  guid,
-  removeDirectory
-} from '../../lib/utils';
+import { guid,removeDirectory } from '../../../lib/utils';
+
 export default class RegistrationController {
 
   constructor() {
@@ -13,21 +11,30 @@ export default class RegistrationController {
   }
 
   post(req, res) {
-    const newUser = this.createUser(req.body);
-    db.users.push(newUser);
-    this.writeDBFile(newUser);
-    res.status(200).json({
-      id: newUser.id
+    const { username, emailAddress } = req.body;
+    microsoftFaceApiService.createPerson(1, {
+      name: username,
+      userData: emailAddress
+    }).subscribe((person) => {
+      const { personId } = person;
+      const newUser = this.createUser({ username, emailAddress, personId });
+      db.users.push(newUser);
+      this.writeDBFile(newUser);
+      res.status(200).json({
+        id: newUser.id,
+        personId: newUser.personId
+      });
     });
   }
 
   writeDBFile(user) {
     const dbPath = path.resolve('lib/database/user.js');
     const contentbefore = fs.readFileSync(dbPath, 'utf-8');
-    
+
     const newContent = `}, {
     id: ${user.id},
     username: '${user.username}',
+    personId: '${user.personId}',
     emailAddress: '${user.emailAddress}',
     token: '${user.token}',
     password: '${user.password}'
@@ -55,7 +62,8 @@ export default class RegistrationController {
       token: guid(),
       username: userDetail.username,
       password: 'identity',
-      emailAddress: userDetail.emailAddress
+      emailAddress: userDetail.emailAddress,
+      personId: userDetail.personId
     }
 
     this.createUserIdentity(newUser.id);
