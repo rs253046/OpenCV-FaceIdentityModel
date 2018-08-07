@@ -1,6 +1,6 @@
 import { DashboardMain, Login, Logout, Registration } from './components';
 import { APP_ROUTES, APP_CONSTANTS } from './constants';
-const { RegistrationStep1, RegistrationStep2 } = Registration;
+const { RegistrationStep1, RegistrationStep2, RegistrationStep3 } = Registration;
 
 const routes = [
   {
@@ -25,6 +25,11 @@ const routes = [
   {
     path: APP_ROUTES.REGISTRATION.STEP_2,
     component: RegistrationStep2,
+    type: APP_CONSTANTS.UNAUTHENTICATED_ROUTE
+  },
+  {
+    path: '/test',
+    component: RegistrationStep3,
     type: APP_CONSTANTS.UNAUTHENTICATED_ROUTE
   }
 ];

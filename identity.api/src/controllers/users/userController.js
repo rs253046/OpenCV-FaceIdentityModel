@@ -24,7 +24,6 @@ export default class UserController {
     readStream.on('end', function() {
       res.status(200).json({data: base64data});
     });
-
   }
 
   authenticationMiddleware(req, res, next) {

@@ -26,6 +26,8 @@ class RegistrationStep2 extends Component {
       snapCount: 0,
       id: props.registration.step1.id,
       personId: props.registration.step1.personId,
+      username: props.registration.step1.username,
+      emailAddress: props.registration.step1.emailAddress,
       binaries: []
     };
   }
@@ -56,11 +58,11 @@ class RegistrationStep2 extends Component {
       return HttpService.post('faceApi/addFace', payload).pipe(tap(val => this.updateProgressBar(this.state.progressBarWidth + 50)));
     });
 
-    request.push(HttpService.post('training/saveSnapshots', { data: this.state.binaries[0], userId: this.state.id }));
+    request.push(HttpService.post('registration/profilePic', { data: this.state.binaries[0], userId: this.state.id }));
 
     zip(...request).subscribe(response => 
       HttpService.post('faceApi/trainPersonGroup', { personGroupId: 1 })
-        .subscribe(() => this.setState({ binaries: [] })));
+        .subscribe(() => {}));
   }
 
   validateStep2() {
@@ -97,12 +99,14 @@ class RegistrationStep2 extends Component {
   }
 
   registrationSuccess() {
+    const {username, binaries} = this.state;
     return (
-      <div className="p-8">
+      <div className="p-8 text-center">
         <div>
-          <h1>Your identity is succesfully registered.</h1>
+          <img src={binaries && binaries[0]} alt="..." className="rounded-circle" height="120" width="120"/>
+          <h1><p>Hi {username}!</p><p> Your identity is succesfully registered.</p></h1>
         </div>
-        <div className="text-right w-50">
+        <div>
           <Link className="btn btn-primary" to={APP_ROUTES.LOGIN}>
             Back to Login
           </Link>

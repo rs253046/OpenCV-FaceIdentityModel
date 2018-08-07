@@ -8,6 +8,7 @@ export default class RegistrationController {
 
   constructor() {
     this.post = this.post.bind(this);
+    this.saveProfilePic = this.saveProfilePic.bind(this);
   }
 
   post(req, res) {
@@ -24,6 +25,19 @@ export default class RegistrationController {
         id: newUser.id,
         personId: newUser.personId
       });
+    });
+  }
+
+  saveProfilePic(req, res) {
+    const { data, userId } = req.body;
+    var base64Data = data.replace(/^data:image\/jpeg;base64,/, "");
+    const faceBasePath = path.resolve(`./lib/training/images/${userId || 0}`)
+    fs.writeFile(faceBasePath + "/out", base64Data, 'base64', function(err) {
+      console.log(err);
+    });
+    res.status(200).json({
+      success: true,
+      faceCount: 0
     });
   }
 

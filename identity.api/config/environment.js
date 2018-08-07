@@ -5,11 +5,11 @@ const config = (env) => {
     port: PORT,
     microsoftFaceApi: {
       keys: {
-        1: "4e2b1f76fb444f4fb6b35592a79f93e4",
-        2: "8ccdaad68aff4e80a53a3168ad8112b0"
+        1: "1fd2c831ca0149069cd1b3244b1e336a",
+        2: "430cd4dd27454ceabfbcb0788097dbd2"
       },
-      subscriptionID: "dc56d138-bd17-4b92-bd34-d2dd3fb04f97",
-      endpoint: "https://eastus.api.cognitive.microsoft.com/face/v1.0"
+      subscriptionID: "1fd2c831ca0149069cd1b3244b1e336a",
+      endpoint: "https://westcentralus.api.cognitive.microsoft.com/face/v1.0"
     },
     webcamPort: 0,
     paths: {

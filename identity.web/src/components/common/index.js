@@ -10,6 +10,8 @@ import DatePickerInput from './form/DatePickerInput';
 import HeaderBar from './HeaderBar';
 import FooterBar from './FooterBar';
 import Webcam from './Webcam';
+import HtmlWebcam from './HtmlWebCam';
+
 export {
   RouteHandler,
   FormatMessage,
@@ -22,5 +24,6 @@ export {
   DatePickerInput,
   HeaderBar,
   FooterBar,
-  Webcam
+  Webcam,
+  HtmlWebcam
 };

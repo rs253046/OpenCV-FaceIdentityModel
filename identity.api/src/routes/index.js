@@ -1,5 +1,3 @@
-import trainingRoute from './openCV/trainingRoute';
-import recognitionRoute from './openCV/recognitionRoute';
 import registrationRoute from './users/registrationRoute';
 import authenticationRoute from './users/authenticationRoute';
 import userRoute from './users/userRoute';
@@ -39,9 +37,7 @@ class Routes {
   }
 
   create(app, ioSocket) {
-    app.use('/training', trainingRoute(ioSocket));
     app.use('/token', authenticationRoute());
-    app.use('/recognition', recognitionRoute(ioSocket));
     app.use('/user', userRoute());
     app.use('/registration', registrationRoute());
     app.use('/faceApi', faceApiRoute());
