@@ -8,9 +8,9 @@ export default {
     errors: {}
   },
   registration: {
-    step1: {},
-    step2: {},
-    currentStep: 1
+    registration: {},
+    currentStep: 1,
+    error: {}
   },
   common: {
     applicationError: {

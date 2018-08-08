@@ -22,7 +22,8 @@ class RegistrationStep1 extends Component {
   registerUser(event) {
     event.preventDefault();
     if (this.isValidRegistrationForm()) {
-      this.props.actions.registerUser(this.state.registration);
+      this.props.actions.setUserRegistrationDetail(this.state.registration);
+      this.transitionToNextStep();
     }
   }
 
@@ -40,7 +41,7 @@ class RegistrationStep1 extends Component {
       formIsValid = false;
       errors.emailAddress = 'email is required.';
     } else {
-      if(!emailValidator(registration.emailAddress)) {
+      if (!emailValidator(registration.emailAddress)) {
         formIsValid = false;
         errors.emailAddress = 'Please enter correct email.';
       }
@@ -52,7 +53,9 @@ class RegistrationStep1 extends Component {
   }
 
   nextStep() {
-    const { history } = this.props;
+    const { history, actions } = this.props;
+    
+    actions.currentStep(2);
     history.push('/registration/step2');
   }
 
@@ -63,21 +66,18 @@ class RegistrationStep1 extends Component {
     this.setState({ registration });
   }
 
-  transitionToNextStep(currentStep, step1) {
+  transitionToNextStep() {
     this.nextStep();
   }
 
   render() {
-    const { currentStep, step1 } = this.props.registration;
-
-    if (currentStep === 2) {
-      this.transitionToNextStep(currentStep, step1);
-    }
-
+    const error = this.props.registration.error.data &&
+      (<span className="text-danger">{this.props.registration.error.data.data.error.message}</span>);
+      
     return (
       <div className="p-8">
         <Card>
-          <CardHeader><CardText>Registration</CardText></CardHeader>
+          <CardHeader><CardText>Registration {error}</CardText></CardHeader>
           <CardBody>
             <RegistrationForm onChange={this.updateRegistrationState} registration={this.state.registration} errors={this.state.errors}
               onSubmit={this.registerUser} />
@@ -92,7 +92,7 @@ RegistrationStep1.propTypes = {
   actions: PropTypes.object.isRequired,
   history: PropTypes.object.isRequired,
   registration: PropTypes.shape({
-    step1: PropTypes.object.isRequired,
+    registration: PropTypes.object.isRequired,
     currentStep: PropTypes.number.isRequired
   })
 };

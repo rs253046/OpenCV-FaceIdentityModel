@@ -7,10 +7,10 @@ import { HtmlWebcamService } from '../../../services';
 class HtmlWebcam extends Component {
   constructor(props, context) {
     super(props, context);
-    this.state = this.getInitialState(props);
+    this.state = this.getInitialState();
   }
 
-  getInitialState(props) {
+  getInitialState() {
     return {
       deviceIdentifiers: []
     };
@@ -19,20 +19,20 @@ class HtmlWebcam extends Component {
   componentDidMount() {
     const { turnOn, turnOff, snap, identifier } = this.props;
     HtmlWebcamService.getMediaDevices().then(mediaDevice => {
-      let videoDevices = mediaDevice.filter(device => device.kind === 'videoinput');
+      const videoDevices = mediaDevice.filter(device => device.kind === 'videoinput');
       this.setState({ deviceIdentifiers: videoDevices.map(device => `${identifier}_${device.deviceId}`) });
       const options = videoDevices.map(device => ({
         deviceIdentifier: document.getElementById(`${identifier}_${device.deviceId}`), deviceId: device.deviceId
       }));
       this.attach(options);
       this.manageWebcam(turnOn, turnOff, snap);
-    }) 
+    })
   }
 
   componentWillUnmount() { }
 
   attach(options) {
-     HtmlWebcamService.attach(options);
+    HtmlWebcamService.attach(options);
   }
 
   manageWebcam(turnOn, turnOff, snap) {
@@ -51,7 +51,6 @@ class HtmlWebcam extends Component {
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     context.drawImage(video, 0, 0);
-    console.log(canvas.toDataURL('image/jpeg'));
     return canvas.toDataURL('image/jpeg');
   }
 
@@ -66,44 +65,47 @@ class HtmlWebcam extends Component {
   render() {
     const { deviceIdentifiers } = this.state;
     const { turnOn, turnOff, snap, className } = this.props;
+    const videoDeviceStreams = deviceIdentifiers.map(deviceIdentifier => (
+      <div key={deviceIdentifier}>
+        <video autoPlay id={deviceIdentifier} height="480" width="640" className={className} />
+        <canvas />
+      </div>
+    ));
     this.manageWebcam(turnOn, turnOff, snap);
     return (
       <div>
-        {
-          deviceIdentifiers.map(deviceIdentifier => 
-            (<div key={deviceIdentifier}><video autoPlay id={deviceIdentifier} height="480" width="640" className={className} /><canvas></canvas></div>))
-        }
+        {videoDeviceStreams}
       </div>
     );
   }
 }
 
-HtmlWebcam.defaultProps = { 
+HtmlWebcam.defaultProps = {
   className: 'd-none',
   identifier: 'webcam',
   turnOn: false,
   turnOff: false,
-  onSnap: () => {},
-  snap: 0,
+  onSnap: () => { },
+  snap: 0
 };
 
 function mapStateToProps(state, ownProps) {
-  return { };
+  return {};
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    actions: { }
+    actions: {}
   };
 }
 
-HtmlWebcam.propTypes = { 
+HtmlWebcam.propTypes = {
   turnOn: PropTypes.bool.isRequired,
   turnOff: PropTypes.bool.isRequired,
   snap: PropTypes.number.isRequired,
   identifier: PropTypes.string.isRequired,
   className: PropTypes.string.isRequired,
-  onSnap: PropTypes.func.isRequired,
+  onSnap: PropTypes.func.isRequired
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(HtmlWebcam);
