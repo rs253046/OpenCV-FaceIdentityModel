@@ -5,7 +5,7 @@ import { PropTypes } from 'prop-types';
 import { Link } from 'react-router-dom';
 import { APP_ROUTES } from '../../../../constants';
 import { registrationAction } from '../../../../actions';
-import { Webcam } from '../../../common';
+import { HtmlWebcam } from '../../../common';
 import { HttpService } from '../../../../services';
 import { timer, zip } from 'rxjs';
 import { take, tap } from 'rxjs/operators';
@@ -155,7 +155,7 @@ class RegistrationStep2 extends Component {
     return (
       <div>
         {this.renderStep2()}
-        <Webcam turnOn={turnOn} turnOff={turnOff} onSnap={this.onSnap} snap={snapCount} />
+        <HtmlWebcam turnOn={turnOn} turnOff={turnOff} onSnap={this.onSnap} snap={snapCount} />
       </div>
     );
   }
