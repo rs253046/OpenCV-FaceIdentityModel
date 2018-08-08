@@ -15,15 +15,19 @@ export default class UserController {
     const { userId } = req.query;
     const faceBasePath = path.resolve(`./lib/training/images/${userId || 0}`);
     const faceImageList = fs.readdirSync(faceBasePath);
-    let readStream = fs.createReadStream(path.resolve(faceBasePath, faceImageList[0]));
-    var base64data = '';
-    readStream.on('data', function(result) {
-      base64data += new Buffer(result).toString('base64');
-    });
+    function base64_encode(file) {
+      var bitmap = fs.readFileSync(file);
+      return new Buffer(bitmap).toString('base64');
+    }
+    // let readStream = fs.createReadStream(path.resolve(faceBasePath, faceImageList[0]));
+    // var base64data = '';
+    // readStream.on('data', function(result) {
+    //   base64data += new Buffer(result).toString('base64');
+    // });
+    res.status(200).json({data: base64_encode(path.resolve(faceBasePath, faceImageList[0]))});
+    // readStream.on('end', function() {
 
-    readStream.on('end', function() {
-      res.status(200).json({data: base64data});
-    });
+    // });
   }
 
   authenticationMiddleware(req, res, next) {

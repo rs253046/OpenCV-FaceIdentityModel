@@ -4,7 +4,7 @@ import { bindActionCreators } from 'redux';
 import { PropTypes } from 'prop-types';
 import { Link } from 'react-router-dom';
 import { APP_ROUTES } from '../../../../constants';
-import { registrationAction } from '../../../../actions';
+import { registrationAction, commonAction } from '../../../../actions';
 import { HtmlWebcam } from '../../../common';
 import { HttpService } from '../../../../services';
 import { timer, zip } from 'rxjs';
@@ -42,7 +42,7 @@ class RegistrationStep2 extends Component {
 
   captureImageSet() {
     this.turnOn();
-    timer(1000, 1000).pipe(take(2)).subscribe(
+    timer(2000, 2000).pipe(take(2)).subscribe(
       () => this.takeSnap(), 
       () => {}, 
       () => {
@@ -54,15 +54,15 @@ class RegistrationStep2 extends Component {
 
   trainIdentityModel() {
     const request = this.state.binaries.map((binarie, index) => {
-      const payload = { data: this.state.binaries[0], personGroupId: 1, personId: this.state.personId };
+      const payload = { data: binarie[0], personGroupId: 1, personId: this.state.personId };
       return HttpService.post('faceApi/addFace', payload).pipe(tap(val => this.updateProgressBar(this.state.progressBarWidth + 50)));
     });
 
-    request.push(HttpService.post('registration/profilePic', { data: this.state.binaries[0], userId: this.state.id }));
+    request.push(HttpService.post('registration/profilePic', { data: this.state.binaries[0] && this.state.binaries[0][0], userId: this.state.id }));
 
     zip(...request).subscribe(response => 
       HttpService.post('faceApi/trainPersonGroup', { personGroupId: 1 })
-        .subscribe(() => {}));
+        .subscribe(() => {}), (error) => {this.props.actions.hideLoader();});
   }
 
   validateStep2() {
@@ -103,7 +103,7 @@ class RegistrationStep2 extends Component {
     return (
       <div className="p-8 text-center">
         <div>
-          <img src={binaries && binaries[0]} alt="..." className="rounded-circle" height="120" width="120"/>
+          {binaries && binaries[0].map((binarie, index) => <img src={binarie} alt="..." className="rounded-circle" height="120" width="120" key={index}/>)}
           <h1><p>Hi {username}!</p><p> Your identity is succesfully registered.</p></h1>
         </div>
         <div>
@@ -169,13 +169,14 @@ RegistrationStep2.propTypes = {
 
 function mapStateToProps(state, ownProps) {
   return {
-    registration: state.registration
+    registration: state.registration,
+    actions: PropTypes.object.isRequired
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    actions: bindActionCreators(registrationAction, dispatch)
+    actions: bindActionCreators({ ...registrationAction, ...commonAction }, dispatch)
   };
 }
 
