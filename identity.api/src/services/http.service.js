@@ -25,7 +25,7 @@ class HttpService {
         'Pragma': 'no-cache'
       }
     };
-    this._retryRequestAttempts = 3; // eslint-disable-line no-magic-numbers
+    this._retryRequestAttempts = 0; // eslint-disable-line no-magic-numbers
     this._retryStatusCodes = [502, 0]; // eslint-disable-line no-magic-numbers
     this._pendingRequests = 0; // eslint-disable-line no-magic-numbers
     this._isHttpLoading = false;

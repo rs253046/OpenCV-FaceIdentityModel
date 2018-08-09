@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "babel-node index.js",
-    "debug": "babel-node --inspect=5890 index.js"
+    "debug": "babel-node --inspect=9222 index.js"
   },
   "author": "",
   "license": "MIT",

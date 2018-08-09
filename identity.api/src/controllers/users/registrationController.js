@@ -4,7 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import { guid, removeDirectory } from '../../../lib/utils';
 import { zip, of } from 'rxjs';
-import { combineAll } from 'rxjs/operators';
+import { combineAll, map } from 'rxjs/operators';
 
 export default class RegistrationController {
 
@@ -23,6 +23,8 @@ export default class RegistrationController {
         message: {}
       };
 
+      detections = detections.filter(detection => detection.detection.length > 0);
+
       detections.forEach((detection) => {
         if (detection.length > 1) {
           error.state = true;
@@ -34,6 +36,15 @@ export default class RegistrationController {
         }
       });
 
+      if (detections.length < 1) {
+        error.state = true;
+        error.message = {
+          status: 404, data: {
+            error: { code: 'No face detected', message: 'No face has been detected.' }
+          }
+        };
+      }
+
       if (error.state) {
         res.status(error.message.status).json({
           status: error.message,
@@ -44,16 +55,17 @@ export default class RegistrationController {
       }
 
       this.identify(detections).subscribe((identifications) => {
-
         identifications.forEach((identification) => {
-          if (identification.length > 0) {
-            error.state = true;
-            error.message = {
-              status: 401, data: {
-                error: { code: 'UserAlreadyRegistered', message: 'User is already registered.' }
-              }
-            };
-          }
+          identification.forEach(identity => {
+            if (identity.candidates.length > 0) {
+              error.state = true;
+              error.message = {
+                status: 401, data: {
+                  error: { code: 'UserAlreadyRegistered', message: 'User is already registered.' }
+                }
+              };
+            }
+          })
         });
 
         if (error.state) {
@@ -65,19 +77,22 @@ export default class RegistrationController {
           return;
         }
 
-        this.initiateUserRegisteration(req, res);
+        this.initiateUserRegisteration(req, res, detections);
       }, error => {
-        this.initiateUserRegisteration(req, res);
+        this.initiateUserRegisteration(req, res, detections);
       });
-    }, error => this.handleError(error, res));
+    }, error => {
+      this.handleError(error, res)
+    });
   }
 
-  initiateUserRegisteration(req, res) {
+  initiateUserRegisteration(req, res, detections) {
     const { registration, data } = req.body;
+    const binary = detections.map(detection => detection.data);
     const { username, emailAddress } = registration;
     this.createPerson(registration).subscribe((person) => {
       const { personId } = person;
-      this.addFaces(data, personId).subscribe(() => {
+      this.addFaces(binary, personId).subscribe(() => {
         this.trainPersonGroup().subscribe(() => {
           const newUser = this.createUser({ username, emailAddress, personId });
           db.users.push(newUser);
@@ -87,9 +102,15 @@ export default class RegistrationController {
             id: newUser.id,
             personId: newUser.personId
           });
-        }, error => this.handleError(error, res));
-      }, error => this.handleError(error, res));
-    }, error => this.handleError(error, res));
+        }, error => {
+          this.handleError(error, res);
+        });
+      }, error => {
+        this.handleError(error, res);
+      });
+    }, error => {
+      this.handleError(error, res);
+    });
   }
 
   handleError(error, res) {
@@ -108,15 +129,15 @@ export default class RegistrationController {
   detect(data) {
     const request = data.map((face, index) => {
       const binary = this.convertBase64ToBinary(face);
-      return microsoftFaceApiService.detect(binary, true, false, '');
+      return microsoftFaceApiService.detect(binary, true, false, '').pipe(map((detection) => ({data: binary, detection })));
     });
 
     return of(...request).pipe(combineAll());
   }
 
   identify(detections) {
-    const request = detections.map((face, index) => {
-      return microsoftFaceApiService.identify({ faceIds: face.map(i => i.faceId), personGroupId: 1 });
+    const request = detections.map((detection, index) => {
+      return microsoftFaceApiService.identify({ faceIds: detection.detection.map(i => i.faceId), personGroupId: 1 });
     });
 
     return of(...request).pipe(combineAll());
@@ -135,8 +156,7 @@ export default class RegistrationController {
 
   addFaces(faceImages, personId) {
     const request = faceImages.map((face, index) => {
-      const binary = this.convertBase64ToBinary(face);
-      return microsoftFaceApiService.addFace(1, personId, binary);
+      return microsoftFaceApiService.addFace(1, personId, face);
     });
 
     return zip(...request);
