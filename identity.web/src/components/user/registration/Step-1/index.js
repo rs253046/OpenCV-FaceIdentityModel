@@ -93,7 +93,8 @@ RegistrationStep1.propTypes = {
   history: PropTypes.object.isRequired,
   registration: PropTypes.shape({
     registration: PropTypes.object.isRequired,
-    currentStep: PropTypes.number.isRequired
+    currentStep: PropTypes.number.isRequired,
+    error: PropTypes.object.isRequired
   })
 };
 

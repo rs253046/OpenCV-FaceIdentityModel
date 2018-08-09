@@ -26,7 +26,7 @@ class HtmlWebcam extends Component {
       }));
       this.attach(options);
       this.manageWebcam(turnOn, turnOff, snap);
-    })
+    });
   }
 
   componentWillUnmount() { }

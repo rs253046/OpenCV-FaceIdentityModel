@@ -5,7 +5,7 @@ class HtmlWebcamService {
   }
 
   attach(options) {
-    options.forEach((option)=> {
+    options.forEach((option) => {
       const element = option.deviceIdentifier;
       if (element && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         navigator.mediaDevices.getUserMedia({
@@ -18,7 +18,7 @@ class HtmlWebcamService {
           element.play();
         });
       }
-    })
+    });
   }
 
   turnOn() {
@@ -26,7 +26,7 @@ class HtmlWebcamService {
   }
 
   turnOff() {
-    this.streams && this.streams.length > 0 &&  this.streams.map((stream) => stream.getTracks().forEach(track =>  track.stop()));
+    this.streams && this.streams.length > 0 && this.streams.map((stream) => stream.getTracks().forEach(track => track.stop()));
   }
 }
 
