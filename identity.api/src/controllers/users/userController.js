@@ -8,7 +8,7 @@ export default class UserController {
   }
 
   get(req, res) {
-    res.status(200).json(authenticationService.getCurrentUser(req.headers.authorization));
+    res.status(200).json({...authenticationService.getCurrentUser(req.headers.authorization)});
   }
 
   getProfilePic(req, res) {

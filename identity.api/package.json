@@ -2,11 +2,12 @@
   "name": "identity.api",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "bin/server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "babel-node index.js",
-    "debug": "babel-node --inspect=9222 index.js"
+    "start": "babel-node bin/server.js",
+    "debug": "babel-node --inspect=9222 bin/server.js",
+    "pm2:dev": "pm2 start ./config/pm2/ecosystem.config.js"
   },
   "author": "",
   "license": "MIT",

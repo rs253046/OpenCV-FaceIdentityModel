@@ -2,7 +2,6 @@ import express from 'express';
 import FaceApiController from '../../controllers/microsoftFaceApi/faceApiController';
 
 const faceApiRouter = express.Router();
-
 const faceApiRoute = () => {
   const faceApiController = new FaceApiController();
 

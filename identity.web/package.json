@@ -7,7 +7,7 @@
     "eslint": "node_modules/.bin/esw src",
     "eslint:fix": "node_modules/.bin/esw src --fix",
     "eslint:watch": "npm run eslint -- --watch",
-    "open:src:dev": "REACT_APP_STAGE=development react-scripts start",
+    "open:src:dev": "PORT=3001 HTTPS=true CHOKIDAR_USEPOLLING=true REACT_APP_STAGE=development react-scripts start",
     "open:src:prod": "REACT_APP_STAGE=production react-scripts start",
     "open:src:test": "REACT_APP_STAGE=testing react-scripts start",
     "open:src:staging": "REACT_APP_STAGE=staging react-scripts start",

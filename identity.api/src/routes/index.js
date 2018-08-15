@@ -34,11 +34,11 @@ class Routes {
     });
 
     //Handle any routes that are unhandled and return 404
-    app.use(function(req, res, next) {
-      const err = new Error('Not Found');
-      err.status = 404;
-      res.render('errors/404', err);
-    });
+    // app.use(function(req, res, next) {
+    //   const err = new Error('Not Found');
+    //   err.status = 404;
+    //   res.render('errors/404', err);
+    // });
   }
 
   configureCors(app) {

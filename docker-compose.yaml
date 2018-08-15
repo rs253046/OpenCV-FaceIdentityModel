@@ -1,0 +1,32 @@
+version: "3.1"
+
+services:
+  identityapi:
+    build: 
+      context: .
+      dockerfile: identity.api/.docker/node/node.dev.dockerfile
+    ports:
+      - 3000:3000
+    networks:
+      - identity-network
+
+    volumes:
+      - ./identity.api:/var/www
+
+  identityweb:
+    build: 
+      context: .
+      dockerfile: identity.web/.docker/identity.web/identity.web.dev.dockerfile
+    ports:
+      - 3001:3001
+      - '49153:49153'
+    volumes:
+      - ./identity.web:/var/www
+    networks:
+      - identity-network
+    
+
+
+networks:
+  identity-network:
+    driver: bridge
