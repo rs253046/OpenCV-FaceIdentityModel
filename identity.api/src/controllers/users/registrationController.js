@@ -2,7 +2,9 @@ import microsoftFaceApiService from '../../services/microsoftFaceApiService';
 import db from '../../../lib/database/user';
 import fs from 'fs';
 import path from 'path';
-import { guid,removeDirectory } from '../../../lib/utils';
+import { guid, removeDirectory } from '../../../lib/utils';
+import { zip, of } from 'rxjs';
+import { combineAll, map } from 'rxjs/operators';
 
 export default class RegistrationController {
 
@@ -12,32 +14,159 @@ export default class RegistrationController {
   }
 
   post(req, res) {
-    const { username, emailAddress } = req.body;
-    microsoftFaceApiService.createPerson(1, {
-      name: username,
-      userData: emailAddress
-    }).subscribe((person) => {
-      const { personId } = person;
-      const newUser = this.createUser({ username, emailAddress, personId });
-      db.users.push(newUser);
-      this.writeDBFile(newUser);
-      res.status(200).json({
-        id: newUser.id,
-        personId: newUser.personId
+    const { registration, data } = req.body;
+    const { username, emailAddress } = registration;
+    this.detect(data).subscribe((detections) => {
+
+      const error = {
+        state: false,
+        message: {}
+      };
+
+      detections = detections.filter(detection => detection.detection.length > 0);
+
+      detections.forEach((detection) => {
+        if (detection.length > 1) {
+          error.state = true;
+          error.message = {
+            status: 401, data: {
+              error: { code: 'MultipleFaceDetected', message: 'Multiple face has been detected.' }
+            }
+          };
+        }
       });
+
+      if (detections.length < 1) {
+        error.state = true;
+        error.message = {
+          status: 404, data: {
+            error: { code: 'No face detected', message: 'No face has been detected.' }
+          }
+        };
+      }
+
+      if (error.state) {
+        res.status(error.message.status).json({
+          status: error.message,
+          data: error.message.data
+        });
+
+        return;
+      }
+
+      this.identify(detections).subscribe((identifications) => {
+        identifications.forEach((identification) => {
+          identification.forEach(identity => {
+            if (identity.candidates.length > 0) {
+              error.state = true;
+              error.message = {
+                status: 401, data: {
+                  error: { code: 'UserAlreadyRegistered', message: 'User is already registered.' }
+                }
+              };
+            }
+          })
+        });
+
+        if (error.state) {
+          res.status(error.message.status).json({
+            status: error.message,
+            data: error.message.data
+          });
+
+          return;
+        }
+
+        this.initiateUserRegisteration(req, res, detections);
+      }, error => {
+        this.initiateUserRegisteration(req, res, detections);
+      });
+    }, error => {
+      this.handleError(error, res)
     });
   }
 
-  saveProfilePic(req, res) {
-    const { data, userId } = req.body;
-    var base64Data = data.replace(/^data:image\/jpeg;base64,/, "");
-    const faceBasePath = path.resolve(`./lib/training/images/${userId || 0}`)
-    fs.writeFile(faceBasePath + "/out", base64Data, 'base64', function(err) {
-      console.log(err);
+  initiateUserRegisteration(req, res, detections) {
+    const { registration, data } = req.body;
+    const binary = detections.map(detection => detection.data);
+    const { username, emailAddress } = registration;
+    this.createPerson(registration).subscribe((person) => {
+      const { personId } = person;
+      this.addFaces(binary, personId).subscribe(() => {
+        this.trainPersonGroup().subscribe(() => {
+          const newUser = this.createUser({ username, emailAddress, personId });
+          db.users.push(newUser);
+          this.writeDBFile(newUser);
+          this.saveProfilePic(data[0], newUser.id);
+          res.status(200).json({
+            id: newUser.id,
+            personId: newUser.personId
+          });
+        }, error => {
+          this.handleError(error, res);
+        });
+      }, error => {
+        this.handleError(error, res);
+      });
+    }, error => {
+      this.handleError(error, res);
     });
-    res.status(200).json({
-      success: true,
-      faceCount: 0
+  }
+
+  handleError(error, res) {
+    const {
+      status,
+      statusText,
+      data
+    } = error;
+    res.status(status).json({
+      status,
+      statusText,
+      data
+    });
+  }
+
+  detect(data) {
+    const request = data.map((face, index) => {
+      const binary = this.convertBase64ToBinary(face);
+      return microsoftFaceApiService.detect(binary, true, false, '').pipe(map((detection) => ({data: binary, detection })));
+    });
+
+    return of(...request).pipe(combineAll());
+  }
+
+  identify(detections) {
+    const request = detections.map((detection, index) => {
+      return microsoftFaceApiService.identify({ faceIds: detection.detection.map(i => i.faceId), personGroupId: 1 });
+    });
+
+    return of(...request).pipe(combineAll());
+  }
+
+  createPerson(registration) {
+    return microsoftFaceApiService.createPerson(1, {
+      name: registration.username,
+      userData: registration.emailAddress
+    })
+  }
+
+  trainPersonGroup() {
+    return microsoftFaceApiService.trainPersonGroup(1);
+  }
+
+  addFaces(faceImages, personId) {
+    const request = faceImages.map((face, index) => {
+      return microsoftFaceApiService.addFace(1, personId, face);
+    });
+
+    return zip(...request);
+  }
+
+  saveProfilePic(data, userId) {
+    const base64Data = data.replace(/^data:image\/jpeg;base64,/, "");
+    const faceBasePath = path.resolve(`./lib/training/images/${userId || 0}`)
+    fs.writeFile(faceBasePath + "/out", base64Data, 'base64', function (err) {
+      console.log(err);
     });
   }
 
@@ -82,5 +211,12 @@ export default class RegistrationController {
 
     this.createUserIdentity(newUser.id);
     return newUser;
+  }
+
+  convertBase64ToBinary(dataURL) {
+    var BASE64_MARKER = ';base64,';
+    var base64Index = dataURL.indexOf(BASE64_MARKER) + BASE64_MARKER.length;
+    var base64 = dataURL.substring(base64Index);
+    return new Buffer(base64, 'base64');
   }
 }

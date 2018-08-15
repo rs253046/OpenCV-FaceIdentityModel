@@ -12,7 +12,7 @@ class RegistrationStep3 extends Component {
   render() {
     return (
       <div className="p-8">
-         <HtmlWebcam />
+        <HtmlWebcam />
       </div>
     );
   }
