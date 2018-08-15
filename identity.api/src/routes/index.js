@@ -26,6 +26,19 @@ class Routes {
       limit: '50mb'
     }));
     app.use(express.static(__dirname + '/public'));
+
+
+    app.use(function(err, req, res, next) {
+      console.error(err.stack);
+      res.send(500, { message: err.message });
+    });
+
+    //Handle any routes that are unhandled and return 404
+    app.use(function(req, res, next) {
+      const err = new Error('Not Found');
+      err.status = 404;
+      res.render('errors/404', err);
+    });
   }
 
   configureCors(app) {
