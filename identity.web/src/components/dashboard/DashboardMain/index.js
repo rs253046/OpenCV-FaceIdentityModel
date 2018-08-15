@@ -8,7 +8,8 @@ class DashboardMain extends Component {
 
   getUserMood() {
     const { session } = this.props;
-    if (session.currentUser && session.currentUser.faceInfo) {
+
+    if (session.currentUser && session.currentUser.faceInfo && session.currentUser.faceInfo.faceAttributes) {
       const emotions = session.currentUser.faceInfo.faceAttributes.emotion;
       return Object.keys(emotions).reduce((a, b) => emotions[a] > emotions[b] ? a : b);
     }

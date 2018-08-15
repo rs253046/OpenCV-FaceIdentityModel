@@ -65,6 +65,7 @@ class Login extends Component {
         faceIds: faceInfo.map(i => i.faceId),
         personGroupId: 1
       }).subscribe((res) => {
+        this.props.actions.hideLoader();
         this.props.actions.login({
           username: JSON.stringify({ faceInfo: faceInfo[0], personId: res[0].candidates[0] && res[0].candidates[0].personId }),
           password: 'identity'

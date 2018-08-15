@@ -4,8 +4,8 @@ import { bindActionCreators } from 'redux';
 import { PropTypes } from 'prop-types';
 import { Link } from 'react-router-dom';
 import { APP_ROUTES } from '../../../../constants';
-import { registrationAction } from '../../../../actions';
-import { Webcam } from '../../../common';
+import { registrationAction, commonAction } from '../../../../actions';
+import { HtmlWebcam } from '../../../common';
 import { HttpService } from '../../../../services';
 import { timer, zip } from 'rxjs';
 import { take, tap } from 'rxjs/operators';
@@ -13,97 +13,68 @@ class RegistrationStep2 extends Component {
   constructor(props, context) {
     super(props, context);
     this.validateStep2();
-    this.state = this.getInitialState(props);
+    this.state = this.getInitialState();
     this.onSnap = this.onSnap.bind(this);
-    this.props.actions.clearRegisteredUser();
   }
 
-  getInitialState(props) {
+  getInitialState() {
     return {
       progressBarWidth: 0,
       turnOff: false,
       turnOn: false,
       snapCount: 0,
-      id: props.registration.step1.id,
-      personId: props.registration.step1.personId,
-      username: props.registration.step1.username,
-      emailAddress: props.registration.step1.emailAddress,
       binaries: []
     };
   }
 
   componentDidMount() {
-    this.captureImageSet();
+    if (this.validateStep2()) {
+      this.captureImageSet();
+    }
   }
 
   componentWillUnmount() {
     this.turnOff();
   }
 
+  validateStep2() {
+    const { history, registration } = this.props;
+    
+    if (registration.currentStep === 1) {
+      this.props.actions.hideLoader();
+      history.push('/registration/step1');
+
+      return false;
+    }
+
+    return true;
+  }
+
   captureImageSet() {
     this.turnOn();
+    this.props.actions.showLoader();
     timer(1000, 1000).pipe(take(2)).subscribe(
-      () => this.takeSnap(), 
-      () => {}, 
+      () => this.takeSnap(),
+      () => { },
       () => {
-        this.trainIdentityModel();
+        this.registerUserIdentity();
         this.turnOff();
       }
     );
   }
 
-  trainIdentityModel() {
-    const request = this.state.binaries.map((binarie, index) => {
-      const payload = { data: this.state.binaries[0], personGroupId: 1, personId: this.state.personId };
-      return HttpService.post('faceApi/addFace', payload).pipe(tap(val => this.updateProgressBar(this.state.progressBarWidth + 50)));
-    });
-
-    request.push(HttpService.post('registration/profilePic', { data: this.state.binaries[0], userId: this.state.id }));
-
-    zip(...request).subscribe(response => 
-      HttpService.post('faceApi/trainPersonGroup', { personGroupId: 1 })
-        .subscribe(() => {}));
-  }
-
-  validateStep2() {
-    const { history, registration } = this.props;
-    if (registration.currentStep === 1) {
-      history.push('/registration/step1');
-    }
-  }
-
-  updateProgressBar(width) {
-    this.setState({ progressBarWidth: width });
-  }
-
-  registrationProgressBar() {
-    const { progressBarWidth } = this.state;
-    return (
-      <div className="p-12">
-        <div className="row pb-2">
-          <div className="col">
-            Registering...
-          </div>
-        </div>
-        <div className="row">
-          <div className="col">
-            <div className="progress mb-1">
-              <div className="progress-bar bg-success progress-bar-striped" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style={{ width: progressBarWidth + '%' }}>
-                {progressBarWidth}% Trained
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+  registerUserIdentity() {
+    const user = { ...this.props.registration, data: this.state.binaries };
+    this.props.actions.registerUser(user);
   }
 
   registrationSuccess() {
-    const {username, binaries} = this.state;
+    const { binaries } = this.state;
+    const { username } = this.props.registration.registration;
     return (
       <div className="p-8 text-center">
         <div>
-          <img src={binaries && binaries[0]} alt="..." className="rounded-circle" height="120" width="120"/>
+          {binaries && binaries.map((binarie, index) => <img src={binarie} alt="..." className="rounded-circle" height="120" width="120" key={index} />)}
           <h1><p>Hi {username}!</p><p> Your identity is succesfully registered.</p></h1>
         </div>
         <div>
@@ -137,25 +108,24 @@ class RegistrationStep2 extends Component {
   }
 
   onSnap(data) {
-    this.updateProgressBar(50);
     this.setState(prevState => {
-      return { binaries: [...prevState.binaries, data] };
+      return { binaries: data };
     });
   }
 
   renderStep2() {
-    const { progressBarWidth } = this.state;
-    const registrationProgress = progressBarWidth < 100 ?
-      this.registrationProgressBar(): this.registrationSuccess();
-    return registrationProgress;
+    this.props.actions.hideLoader();
+    return this.registrationSuccess();
   }
 
   render() {
     const { turnOn, turnOff, snapCount } = this.state;
+    const { registration } = this.props;
+    registration.currentStep === 1 && this.validateStep2();
     return (
       <div>
-        {this.renderStep2()}
-        <Webcam turnOn={turnOn} turnOff={turnOff} onSnap={this.onSnap} snap={snapCount} />
+        {registration.currentStep === 3 && this.renderStep2()}
+        <HtmlWebcam turnOn={turnOn} turnOff={turnOff} onSnap={this.onSnap} snap={snapCount} />
       </div>
     );
   }
@@ -169,13 +139,14 @@ RegistrationStep2.propTypes = {
 
 function mapStateToProps(state, ownProps) {
   return {
-    registration: state.registration
+    registration: state.registration,
+    actions: PropTypes.object.isRequired
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    actions: bindActionCreators(registrationAction, dispatch)
+    actions: bindActionCreators({ ...registrationAction, ...commonAction }, dispatch)
   };
 }
 
